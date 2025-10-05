@@ -4,16 +4,22 @@ import {
   FiPackage,
   FiBarChart,
   FiPlus,
-  FiList,
   FiHome,
   FiLogOut,
+  FiEdit,
+  FiTrash2,
+  FiX,
+  FiUpload,
+  FiSave,
+  FiTrendingUp,
+  FiShoppingBag,
+  FiDollarSign,
+  FiEye,
+  FiArrowUp,
+  FiArrowDown,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import ProductForm from "./ProductForm";
-import ProductList from "./ProductList";
-import SalesAnalytics from "./SalesAnalytics";
-import "./VendorDashboard.css";
 
 const VendorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -28,7 +34,6 @@ const VendorDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const productListRef = useRef();
-  const analyticsRef = useRef();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -36,12 +41,8 @@ const VendorDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
 
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      // Fetch dashboard statistics
       const response = await fetch(
         "http://localhost:5000/api/vendor/dashboard-stats",
         {
@@ -55,11 +56,9 @@ const VendorDashboard = () => {
       if (response.ok) {
         const data = await response.json();
         setDashboardStats(data);
-      } else {
-        // setError("Failed to fetch dashboard stats"); // Original code had this line commented out
       }
     } catch (error) {
-      // setError("Error fetching dashboard stats"); // Original code had this line commented out
+      console.error("Error fetching dashboard stats:", error);
     } finally {
       setLoading(false);
     }
@@ -74,227 +73,108 @@ const VendorDashboard = () => {
     navigate("/");
   };
 
-  const tabs = [
-    { id: "overview", label: "Overview", icon: FiHome },
-    { id: "products", label: "Add Product", icon: FiPackage },
-    { id: "analytics", label: "Analytics", icon: FiBarChart },
-  ];
-
-  const refreshProductList = () => {
-    if (productListRef.current && productListRef.current.fetchProducts) {
+  const handleProductAdded = () => {
+    if (productListRef.current?.fetchProducts) {
       productListRef.current.fetchProducts();
     }
-  };
-
-  const handleProductAdded = () => {
-    refreshProductList();
-    fetchDashboardStats(); // Refresh dashboard stats when product is added
-    // Refresh analytics if it's currently active
-    if (analyticsRef.current && analyticsRef.current.refresh) {
-      analyticsRef.current.refresh();
-    }
+    fetchDashboardStats();
     setShowAddProduct(false);
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "overview":
-        return (
-          <motion.div
-            key="overview"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="overview-section"
-          >
-            <div className="overview-header">
-              <h2>Welcome to Your Vendor Dashboard</h2>
-              <p>Manage your products and track your sales performance</p>
-            </div>
+  const tabs = [
+    { id: "overview", label: "Overview", icon: FiHome },
+    { id: "products", label: "Products", icon: FiPackage },
+    { id: "analytics", label: "Analytics", icon: FiBarChart },
+  ];
 
-            <div className="dashboard-stats">
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <FiPackage />
-                </div>
-                <div className="stat-content">
-                  <h3>Total Products</h3>
-                  <p className="stat-number">
-                    {loading ? "..." : dashboardStats.totalProducts}
-                  </p>
-                  <p className="stat-change">
-                    +{loading ? "..." : dashboardStats.productsThisMonth} this
-                    month
-                  </p>
-                </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                <FiPackage className="w-6 h-6 text-white" />
               </div>
-
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <FiBarChart />
-                </div>
-                <div className="stat-content">
-                  <h3>Total Sales</h3>
-                  <p className="stat-number">
-                    {loading
-                      ? "..."
-                      : `PKR ${
-                          dashboardStats.totalSales?.toLocaleString() || 0
-                        }`}
-                  </p>
-                  <p className="stat-change">
-                    +
-                    {loading
-                      ? "..."
-                      : `PKR ${
-                          dashboardStats.salesThisMonth?.toLocaleString() || 0
-                        }`}{" "}
-                    this month
-                  </p>
-                </div>
-              </div>
-
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <FiList />
-                </div>
-                <div className="stat-content">
-                  <h3>Total Orders</h3>
-                  <p className="stat-number">
-                    {loading ? "..." : dashboardStats.totalOrders}
-                  </p>
-                  <p className="stat-change">
-                    +{loading ? "..." : dashboardStats.ordersThisMonth} this
-                    month
-                  </p>
-                </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  Vendor Dashboard
+                </h1>
+                <p className="text-gray-600 text-sm">Manage your products and track performance</p>
               </div>
             </div>
-          </motion.div>
-        );
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all border border-red-200/50"
+            >
+              <FiLogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
 
-      case "products":
-        return (
-          <motion.div
-            key="products"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="products-section"
-          >
-            <div className="section-header">
-              <h2>Product Management</h2>
-              <motion.button
-                className="btn-primary add-product-btn"
-                onClick={() => setShowAddProduct(true)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <FiPlus /> Add Product
-              </motion.button>
-            </div>
-            <ProductList
+          {/* Navigation Tabs */}
+          <div className="flex gap-2 mt-6 overflow-x-auto scrollbar-thin">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                    }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AnimatePresence mode="wait">
+          {activeTab === "overview" && (
+            <OverviewSection loading={loading} stats={dashboardStats} />
+          )}
+          {activeTab === "products" && (
+            <ProductsSection
               ref={productListRef}
               onAddProduct={() => setShowAddProduct(true)}
             />
-          </motion.div>
-        );
-
-      case "analytics":
-        return (
-          <motion.div
-            key="analytics"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="analytics-section"
-          >
-            <div className="section-header">
-              <h2>Sales Analytics</h2>
-            </div>
-            <SalesAnalytics ref={analyticsRef} />
-          </motion.div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="vendor-dashboard">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1>Vendor Dashboard</h1>
-            <p>Manage your products and track performance</p>
-          </div>
-          <motion.button
-            className="logout-btn"
-            onClick={handleLogout}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <FiLogOut />
-            <span>Logout</span>
-          </motion.button>
-        </div>
-      </header>
-
-      {/* Navigation Tabs */}
-      <nav className="dashboard-nav">
-        <div className="nav-tabs">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <motion.button
-                key={tab.id}
-                className={`nav-tab ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Icon />
-                <span>{tab.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="dashboard-content">
-        <AnimatePresence mode="wait">{renderTabContent()}</AnimatePresence>
-      </main>
+          )}
+          {activeTab === "analytics" && <AnalyticsSection />}
+        </AnimatePresence>
+      </div>
 
       {/* Add Product Modal */}
       <AnimatePresence>
         {showAddProduct && (
           <motion.div
-            className="modal-overlay"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowAddProduct(false)}
           >
             <motion.div
-              className="modal-content"
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="modal-header">
-                <h2>Add New Product</h2>
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Add New Product</h2>
                 <button
-                  className="modal-close"
                   onClick={() => setShowAddProduct(false)}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  ×
+                  <FiX className="w-6 h-6 text-gray-600" />
                 </button>
               </div>
               <ProductForm onProductAdded={handleProductAdded} />
@@ -303,6 +183,645 @@ const VendorDashboard = () => {
         )}
       </AnimatePresence>
     </div>
+  );
+};
+
+// Overview Section Component
+const OverviewSection = ({ loading, stats }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="space-y-8"
+  >
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
+      <p className="text-gray-600">Here's an overview of your business performance</p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <StatCard
+        icon={FiPackage}
+        title="Total Products"
+        value={loading ? "..." : stats.totalProducts}
+        change={loading ? "..." : `+${stats.productsThisMonth}`}
+        changeLabel="this month"
+        color="blue"
+      />
+      <StatCard
+        icon={FiDollarSign}
+        title="Total Sales"
+        value={loading ? "..." : `PKR ${stats.totalSales?.toLocaleString() || 0}`}
+        change={loading ? "..." : `+PKR ${stats.salesThisMonth?.toLocaleString() || 0}`}
+        changeLabel="this month"
+        color="green"
+      />
+      <StatCard
+        icon={FiShoppingBag}
+        title="Total Orders"
+        value={loading ? "..." : stats.totalOrders}
+        change={loading ? "..." : `+${stats.ordersThisMonth}`}
+        changeLabel="this month"
+        color="purple"
+      />
+    </div>
+  </motion.div>
+);
+
+// Stat Card Component
+const StatCard = ({ icon: Icon, title, value, change, changeLabel, color }) => {
+  const colorClasses = {
+    blue: "from-blue-500 to-blue-600",
+    green: "from-green-500 to-emerald-600",
+    purple: "from-purple-500 to-indigo-600",
+  };
+
+  return (
+    <motion.div
+      whileHover={{ y: -4 }}
+      className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-6"
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-14 h-14 bg-gradient-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center shadow-lg`}>
+          <Icon className="w-7 h-7 text-white" />
+        </div>
+        <div className="flex items-center gap-1 text-green-600 text-sm font-semibold">
+          <FiArrowUp className="w-4 h-4" />
+          <span>Growth</span>
+        </div>
+      </div>
+      <h3 className="text-gray-600 font-medium mb-2">{title}</h3>
+      <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
+      <p className="text-sm text-gray-500">
+        <span className="font-semibold text-gray-700">{change}</span> {changeLabel}
+      </p>
+    </motion.div>
+  );
+};
+
+// Products Section Component
+const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/vendor/products", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useImperativeHandle(ref, () => ({ fetchProducts }));
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const deleteProduct = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/vendor/products/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setProducts((prev) => prev.filter((p) => p._id !== productId));
+      }
+    } catch (err) {
+      console.error("Error deleting product:", err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4 mx-auto" />
+          <p className="text-gray-600 font-medium">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+    >
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Product Management</h2>
+            <p className="text-gray-600">Manage your product inventory</p>
+          </div>
+          <button
+            onClick={onAddProduct}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+          >
+            <FiPlus className="w-5 h-5" />
+            Add Product
+          </button>
+        </div>
+      </div>
+
+      {products.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-16 text-center">
+          <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <FiPackage className="w-12 h-12 text-gray-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">No Products Yet</h3>
+          <p className="text-gray-600 mb-6">Start by adding your first product</p>
+          <button
+            onClick={onAddProduct}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          >
+            <FiPlus className="inline w-5 h-5 mr-2" />
+            Add Your First Product
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard
+              key={product._id}
+              product={product}
+              onDelete={deleteProduct}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+});
+
+// Product Card Component
+const ProductCard = ({ product, onDelete }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    whileHover={{ y: -4 }}
+    className="bg-white rounded-2xl shadow-lg border border-gray-200/80 overflow-hidden hover:shadow-2xl transition-all"
+  >
+    <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100">
+      {product.images?.[0] ? (
+        <img
+          src={product.images[0]}
+          alt={product.name}
+          className="w-full h-full object-contain p-4"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <FiPackage className="w-16 h-16 text-gray-300" />
+        </div>
+      )}
+      <div className="absolute top-3 right-3">
+        <span className={`px-3 py-1 rounded-lg text-xs font-bold ${product.status === "approved"
+            ? "bg-green-100 text-green-700"
+            : product.status === "pending"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-red-100 text-red-700"
+          }`}>
+          {product.status}
+        </span>
+      </div>
+    </div>
+
+    <div className="p-5">
+      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
+      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            PKR {product.price?.toLocaleString()}
+          </p>
+          <p className="text-xs text-gray-500">Stock: {product.quantity}</p>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors">
+          <FiEdit className="w-4 h-4" />
+          Edit
+        </button>
+        <button
+          onClick={() => onDelete(product._id)}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-colors"
+        >
+          <FiTrash2 className="w-4 h-4" />
+          Delete
+        </button>
+      </div>
+    </div>
+  </motion.div>
+);
+
+// Analytics Section Component
+const AnalyticsSection = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-8"
+  >
+    <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Analytics</h2>
+    <p className="text-gray-600">Analytics dashboard coming soon...</p>
+  </motion.div>
+);
+
+// Product Form Component
+const ProductForm = ({ onProductAdded }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    quantity: "",
+    category: "",
+    brand: "",
+    images: [],
+    specifications: [],
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
+  const fileInputRef = useRef(null);
+
+  const categories = [
+    "Electronics",
+    "Clothing",
+    "Home & Garden",
+    "Sports & Outdoors",
+    "Books",
+    "Automotive",
+    "Health & Beauty",
+    "Toys & Games",
+    "Food & Beverages",
+    "Other",
+  ];
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError(null);
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter((file) => {
+      if (!file.type.startsWith("image/")) {
+        setError("Please select only image files");
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image size should be less than 5MB");
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length + imageFiles.length > 5) {
+      setError("Maximum 5 images allowed");
+      return;
+    }
+
+    const newImageFiles = [...imageFiles, ...validFiles];
+    setImageFiles(newImageFiles);
+
+    const imageUrls = validFiles.map((file) => URL.createObjectURL(file));
+    setFormData((prev) => ({ ...prev, images: [...prev.images, ...imageUrls] }));
+    setError(null);
+  };
+
+  const removeImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const imagePromises = imageFiles.map((file) => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const base64Images = await Promise.all(imagePromises);
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:5000/api/vendor/products", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          price: parseFloat(formData.price),
+          quantity: parseInt(formData.quantity),
+          images: base64Images,
+          specifications: formData.specifications.filter((s) => s.key && s.value),
+        }),
+      });
+
+      if (response.ok) {
+        onProductAdded();
+      } else {
+        throw new Error("Failed to create product");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addSpecification = () => {
+    setFormData((prev) => ({
+      ...prev,
+      specifications: [...prev.specifications, { key: "", value: "" }],
+    }));
+  };
+
+  const updateSpecification = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      specifications: prev.specifications.map((spec, i) =>
+        i === index ? { ...spec, [field]: value } : spec
+      ),
+    }));
+  };
+
+  const removeSpecification = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      specifications: prev.specifications.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-bold text-gray-900 mb-2">
+            Product Name *
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+            placeholder="Enter product name"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-900 mb-2">
+            Description *
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+            rows="4"
+            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"
+            placeholder="Enter detailed product description"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">
+              Category *
+            </label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Brand</label>
+            <input
+              type="text"
+              name="brand"
+              value={formData.brand}
+              onChange={handleChange}
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+              placeholder="Enter brand name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">
+              Price (PKR) *
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              required
+              step="0.01"
+              min="0"
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">
+              Quantity *
+            </label>
+            <input
+              type="number"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              required
+              min="0"
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+              placeholder="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-900 mb-2">
+            Product Images (Max 5)
+          </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleImageChange}
+            multiple
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2"
+          >
+            <FiUpload className="w-8 h-8 text-gray-400" />
+            <span className="text-gray-600 font-medium">Click to upload images</span>
+            <span className="text-sm text-gray-500">Max 5 images, 5MB each</span>
+          </button>
+
+          {formData.images.length > 0 && (
+            <div className="grid grid-cols-5 gap-3 mt-4">
+              {formData.images.map((img, index) => (
+                <div key={index} className="relative group aspect-square">
+                  <img
+                    src={img}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <FiX className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Specifications Section */}
+        <div className="border-t border-gray-200 pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <label className="block text-sm font-bold text-gray-900">
+              Product Specifications (Optional)
+            </label>
+            <button
+              type="button"
+              onClick={addSpecification}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors text-sm"
+            >
+              <FiPlus className="w-4 h-4" />
+              Add Specification
+            </button>
+          </div>
+
+          {formData.specifications.length === 0 ? (
+            <div className="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+              <p className="text-gray-500 text-sm">No specifications added yet</p>
+              <p className="text-gray-400 text-xs mt-1">Click "Add Specification" to add product details</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {formData.specifications.map((spec, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-3 items-start"
+                >
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Specification name (e.g., Weight, Size, Color)"
+                      value={spec.key}
+                      onChange={(e) => updateSpecification(index, "key", e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Value (e.g., 2.5 kg, Large, Red)"
+                      value={spec.value}
+                      onChange={(e) => updateSpecification(index, "value", e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeSpecification(index)}
+                    className="w-12 h-12 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors flex-shrink-0"
+                    title="Remove specification"
+                  >
+                    <FiTrash2 className="w-5 h-5" />
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      >
+        {loading ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <FiSave className="w-5 h-5" />
+            Upload Product
+          </>
+        )}
+      </button>
+    </form>
   );
 };
 

@@ -14,6 +14,7 @@ const ProductCard = ({ product }) => {
     setIsWishlisted(!isWishlisted);
   };
 
+
   const handleAddToCart = () => {
     // Placeholder for add to cart functionality
     alert("Add to cart functionality will be implemented here");
@@ -418,8 +419,8 @@ const ProductCard = ({ product }) => {
 
           {new Date(product.createdAt) >
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) && (
-            <div style={styles.statusBadgeNew}>New</div>
-          )}
+              <div style={styles.statusBadgeNew}>New</div>
+            )}
         </div>
 
         {/* Product Info */}

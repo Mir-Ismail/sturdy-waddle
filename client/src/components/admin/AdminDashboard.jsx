@@ -1,15 +1,12 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiUsers,
   FiPackage,
   FiShoppingCart,
   FiTrendingUp,
-  FiSettings,
   FiLogOut,
   FiHome,
-  FiShield,
-  FiBox,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -18,7 +15,6 @@ import UserList from "./UserList";
 import VendorList from "./VendorList";
 import ProductModeration from "./ProductModeration";
 import SupplyPurchaseDetails from "./SupplyPurchaseDetails";
-import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -32,173 +28,116 @@ const AdminDashboard = () => {
 
   const tabs = [
     { id: "overview", label: "Overview", icon: FiHome },
-    { id: "users", label: "User Management", icon: FiUsers },
-    { id: "vendors", label: "Vendor Management", icon: FiPackage },
-    // { id: "products", label: "Product Moderation", icon: FiBox },
-    // { id: "supply", label: "Supply & Purchase", icon: FiShoppingCart },
-    // { id: "analytics", label: "Analytics", icon: FiTrendingUp },
+    { id: "users", label: "Users", icon: FiUsers },
+    { id: "vendors", label: "Vendors", icon: FiPackage },
+    { id: "products", label: "Products", icon: FiShoppingCart },
+    { id: "analytics", label: "Analytics", icon: FiTrendingUp },
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
-        return (
-          <motion.div
-            key="overview"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="overview-section"
-          >
-            <AdminDashboardStats />
-          </motion.div>
-        );
-
+        return <AdminDashboardStats />;
       case "users":
-        return (
-          <motion.div
-            key="users"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="users-section"
-          >
-            <UserList />
-          </motion.div>
-        );
-
+        return <UserList />;
       case "vendors":
-        return (
-          <motion.div
-            key="vendors"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="vendors-section"
-          >
-            <VendorList />
-          </motion.div>
-        );
-
+        return <VendorList />;
       case "products":
-        return (
-          <motion.div
-            key="products"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="products-section"
-          >
-            <ProductModeration />
-          </motion.div>
-        );
-
-      case "supply":
-        return (
-          <motion.div
-            key="supply"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="supply-section"
-          >
-            <SupplyPurchaseDetails />
-          </motion.div>
-        );
-
+        return <ProductModeration />;
       case "analytics":
         return (
-          <motion.div
-            key="analytics"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="analytics-section"
-          >
-            <div className="analytics-placeholder">
-              <FiTrendingUp size={64} />
-              <h2>Analytics Dashboard</h2>
-              <p>
-                Advanced analytics and reporting features will be available here
-              </p>
-              <div className="analytics-features">
-                <div className="feature-item">
-                  <FiTrendingUp />
-                  <span>Sales Analytics</span>
-                </div>
-                <div className="feature-item">
-                  <FiUsers />
-                  <span>User Growth</span>
-                </div>
-                <div className="feature-item">
-                  <FiPackage />
-                  <span>Product Performance</span>
-                </div>
-                <div className="feature-item">
-                  <FiShoppingCart />
-                  <span>Order Analytics</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          <div className="text-center p-10 text-slate-600">
+            <FiTrendingUp className="mx-auto w-16 h-16 text-blue-500 mb-4" />
+            <h2 className="text-2xl font-semibold text-slate-800">
+              Analytics Dashboard
+            </h2>
+            <p className="text-slate-500 mt-2">
+              Insights & reports will appear here soon.
+            </p>
+          </div>
         );
-
       default:
         return null;
     }
   };
 
   return (
-    <div className="admin-dashboard">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1>Admin Dashboard</h1>
-            <p>Manage your e-commerce platform</p>
-          </div>
-          <motion.button
-            className="logout-btn"
-            onClick={handleLogout}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <FiLogOut />
-            <span>Logout</span>
-          </motion.button>
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Sidebar */}
+      <motion.aside
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="w-64 bg-white/70 backdrop-blur-lg shadow-xl border-r border-slate-200 p-5 hidden md:flex flex-col justify-between"
+      >
+        <div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent mb-8">
+            Admin Panel
+          </h2>
+          <nav className="space-y-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${isActive
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                    : "text-slate-700 hover:bg-slate-100"
+                    }`}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Icon className="w-5 h-5" />
+                  {tab.label}
+                </motion.button>
+              );
+            })}
+          </nav>
         </div>
-      </header>
-
-      {/* Navigation Tabs */}
-      <nav className="dashboard-nav">
-        <div className="nav-container">
-          {tabs.map((tab) => {
-            const IconComponent = tab.icon;
-            return (
-              <motion.button
-                key={tab.id}
-                className={`nav-tab ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <IconComponent />
-                <span>{tab.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </nav>
+        <motion.button
+          onClick={handleLogout}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center justify-center gap-2 px-4 py-3 mt-10 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 shadow-md"
+        >
+          <FiLogOut />
+          Logout
+        </motion.button>
+      </motion.aside>
 
       {/* Main Content */}
-      <main className="dashboard-main">
-        <AnimatePresence mode="wait">{renderTabContent()}</AnimatePresence>
+      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-indigo-700 bg-clip-text text-transparent">
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">
+              Manage your e-commerce operations
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">
+              A
+            </div>
+          </div>
+        </div>
+
+        {/* Animated Page Transition */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white/80 backdrop-blur-xl shadow-2xl border border-slate-200 rounded-2xl p-8"
+          >
+            {renderTabContent()}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

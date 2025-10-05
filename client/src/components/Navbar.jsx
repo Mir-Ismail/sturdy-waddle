@@ -13,6 +13,13 @@ import {
   FiTruck,
   FiPackage,
   FiGrid,
+  FiMapPin,
+  FiHeadphones,
+  FiSettings,
+  FiLogOut,
+  FiCreditCard,
+  FiEye,
+  FiShield
 } from "react-icons/fi";
 import ProfileModal from "./ProfileModal";
 import { useAuth } from "../context/AuthContext";
@@ -23,6 +30,7 @@ const Navbar = () => {
   const [query, setQuery] = useState("");
   const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [showCategories, setShowCategories] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
@@ -31,6 +39,14 @@ const Navbar = () => {
     const onResize = () => setViewportWidth(window.innerWidth);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const isMobile = viewportWidth < 768;
@@ -90,611 +106,391 @@ const Navbar = () => {
     ...(!isAuthenticated ? [{ name: "Login", href: "/login" }] : []),
     ...(isAuthenticated
       ? [
-          // Dashboard - Vendors and Admins only
-          ...(isVendorOrAdmin()
-            ? [
-                {
-                  name: "Dashboard",
-                  href: "/dashboard",
-                },
-              ]
-            : []),
+        // Dashboard - Vendors and Admins only
+        ...(isVendorOrAdmin()
+          ? [
+            {
+              name: "Dashboard",
+              href: "/dashboard",
+            },
+          ]
+          : []),
 
-          // New Arrivals - All authenticated users
-          {
-            name: "New Arrivals",
-            href: "/new-arrivals",
-          },
-        ]
+        // New Arrivals - All authenticated users
+        {
+          name: "New Arrivals",
+          href: "/new-arrivals",
+        },
+      ]
       : []),
   ];
 
-  // Inline styles object
-  const styles = {
-    // Top Bar
-    topBar: {
-      background: '#2c3e50',
-      color: 'white',
-      padding: '8px 0',
-      fontSize: '0.85rem',
-    },
-    topBarContainer: {
-      maxWidth: '1300px',
-      margin: '0 auto',
-      padding: '0 2rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    topBarLeft: {
-      display: 'flex',
-      alignItems: 'center',
-    },
-    customerService: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-    },
-    topBarRight: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1.5rem',
-    },
-    topBarLink: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      color: 'white',
-      textDecoration: 'none',
-      transition: 'opacity 0.3s ease',
-    },
-    icon: {
-      fontSize: '0.9rem',
-    },
-    
-    // Main Header
-    mainHeader: {
-      background: '#3498db',
-      color: 'white',
-      padding: '1rem 0',
-    },
-    headerContainer: {
-      maxWidth: '1300px',
-      margin: '0 auto',
-      padding: '0 2rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '2rem',
-    },
-    
-    // Logo
-    logo: {
-      display: 'flex',
-      alignItems: 'center',
-      textDecoration: 'none',
-      color: 'white',
-      fontSize: '1.8rem',
-      fontWeight: '700',
-    },
-    logoText: {
-      color: 'white',
-    },
-    logoAccent: {
-      color: '#f39c12',
-      position: 'relative',
-    },
-    
-    // Search Container
-    searchContainer: {
-      flex: 1,
-      maxWidth: '500px',
-    },
-    searchBar: {
-      display: 'flex',
-      background: 'white',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-    },
-    searchInput: {
-      flex: 1,
-      padding: '0.75rem 1rem',
-      border: 'none',
-      outline: 'none',
-      fontSize: '0.95rem',
-    },
-    searchBtn: {
-      background: '#2980b9',
-      color: 'white',
-      border: 'none',
-      padding: '0.75rem 1.25rem',
-      cursor: 'pointer',
-      transition: 'background 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    
-    // User Actions
-    userActions: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1rem',
-    },
-    actionItem: {
-      position: 'relative',
-    },
-    actionBtn: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'transparent',
-      border: 'none',
-      color: 'white',
-      fontSize: '1.2rem',
-      padding: '0.5rem',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      textDecoration: 'none',
-    },
-    
-    // Badges
-    cartBadge: {
-      position: 'absolute',
-      top: '-6px',
-      right: '-6px',
-      background: '#e74c3c',
-      color: 'white',
-      fontSize: '0.7rem',
-      padding: '2px 6px',
-      borderRadius: '50%',
-      minWidth: '18px',
-      height: '18px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontWeight: '600',
-    },
-    notificationBadge: {
-      position: 'absolute',
-      top: '-6px',
-      right: '-6px',
-      background: '#e74c3c',
-      color: 'white',
-      fontSize: '0.7rem',
-      padding: '2px 6px',
-      borderRadius: '50%',
-      minWidth: '18px',
-      height: '18px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontWeight: '600',
-    },
-    
-    // Profile Button
-    profileBtn: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      padding: '0.5rem',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-    },
-    profileImage: {
-      width: '32px',
-      height: '32px',
-      borderRadius: '50%',
-      objectFit: 'cover',
-    },
-    profilePlaceholder: {
-      width: '32px',
-      height: '32px',
-      borderRadius: '50%',
-      background: 'rgba(255, 255, 255, 0.2)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontSize: '1rem',
-    },
-    profileName: {
-      color: 'white',
-      fontWeight: '500',
-      fontSize: '0.9rem',
-      maxWidth: '120px',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    },
-    
-    // Login Button
-    loginBtn: {
-      background: 'rgba(255, 255, 255, 0.1)',
-      color: 'white',
-      textDecoration: 'none',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '8px',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-    },
-    
-    // Navigation Bar
-    navBar: {
-      background: '#2980b9',
-      color: 'white',
-      padding: '0.75rem 0',
-      borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    navContainer: {
-      maxWidth: '1300px',
-      margin: '0 auto',
-      padding: '0 2rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    navLeft: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '2rem',
-    },
-    
-    // Categories Dropdown
-    categoriesDropdown: {
-      position: 'relative',
-    },
-    dropdownBtn: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      background: 'transparent',
-      border: 'none',
-      color: 'white',
-      fontSize: '1rem',
-      fontWeight: '600',
-      cursor: 'pointer',
-      padding: '0.5rem 1rem',
-      borderRadius: '6px',
-      transition: 'background 0.3s ease',
-    },
-    chevron: {
-      fontSize: '0.8rem',
-      transition: 'transform 0.3s ease',
-    },
-    dropdownMenu: {
-      position: 'absolute',
-      top: '100%',
-      left: 0,
-      background: '#2980b9',
-      borderRadius: '8px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-      minWidth: '200px',
-      zIndex: 1000,
-      marginTop: '0.5rem',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    dropdownItem: {
-      display: 'block',
-      padding: '0.75rem 1rem',
-      color: 'white',
-      textDecoration: 'none',
-      transition: 'background 0.3s ease',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    dropdownDivider: {
-      height: '1px',
-      background: 'rgba(255, 255, 255, 0.2)',
-      margin: '0.5rem 0',
-    },
-    
-    // Navigation Links
-    navLinks: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1.5rem',
-    },
-    navLink: {
-      color: 'white',
-      textDecoration: 'none',
-      fontWeight: '500',
-      transition: 'opacity 0.3s ease',
-      whiteSpace: 'nowrap',
-    },
-    
-    // Mobile Menu Toggle
-    mobileMenuToggle: {
-      display: 'none',
-      background: 'none',
-      border: 'none',
-      color: 'white',
-      fontSize: '1.5rem',
-      cursor: 'pointer',
-      padding: '0.5rem',
-      borderRadius: '6px',
-      transition: 'background 0.3s ease',
-    },
-    
-    // Mobile Menu
-    mobileMenu: {
-      display: isOpen ? 'block' : 'none',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.8)',
-      zIndex: 2000,
-    },
-    mobileMenuContent: {
-      background: '#2980b9',
-      height: '100%',
-      width: '300px',
-      padding: '2rem',
-      overflowY: 'auto',
-    },
-    mobileMenuItem: {
-      display: 'block',
-      color: 'white',
-      textDecoration: 'none',
-      padding: '1rem 0',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      fontWeight: '500',
-    },
-    mobileCategories: {
-      marginTop: '2rem',
-    },
-    mobileCategoryItem: {
-      display: 'block',
-      color: 'white',
-      textDecoration: 'none',
-      padding: '0.75rem 0',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      fontSize: '0.95rem',
-    },
+  const handleSearch = () => {
+    const q = query.trim();
+    if (q.length > 0) navigate(`/products?q=${encodeURIComponent(q)}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
-    <>
+    <div className="sticky top-0 z-50 bg-white shadow-lg">
       {/* Top Bar */}
-      <div style={styles.topBar}>
-        <div style={styles.topBarContainer}>
-          <div style={styles.topBarLeft}>
-            <span style={styles.customerService}>
-              <FiPhone style={styles.icon} />
-              24/7 Customer service 1-800-234-5678
-            </span>
-          </div>
-          <div style={styles.topBarRight}>
-            {/* Removed shipping and track order links as they don't have routes */}
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <FiHeadphones className="w-4 h-4" />
+                <span className="hidden sm:inline">24/7 Support: 1-800-234-5678</span>
+                <span className="sm:hidden">24/7 Support</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center space-x-2">
+                <FiTruck className="w-4 h-4" />
+                <span>Free Shipping Over $99</span>
+              </div>
+              <div className="hidden lg:flex items-center space-x-2">
+                <FiMapPin className="w-4 h-4" />
+                <span>Store Locator</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
-      <header style={styles.mainHeader}>
-        <div style={styles.headerContainer}>
-          {/* Logo */}
-          <Link to="/" style={styles.logo}>
-            <span style={styles.logoText}>Market</span>
-            <span style={styles.logoAccent}>Match</span>
-          </Link>
+      <header className={`transition-all duration-300 ${scrolled ? 'py-2' : 'py-4'} bg-white border-b border-gray-100`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-xl">M</span>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-2xl font-bold">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Market
+                  </span>
+                  <span className="text-gray-800">Match</span>
+                </h1>
+              </div>
+            </Link>
 
-          {/* Search Bar */}
-          <div style={styles.searchContainer}>
-            <div style={styles.searchBar}>
-              <input
-                type="text"
-                placeholder="Search product..."
-                style={styles.searchInput}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const q = query.trim();
-                    if (q.length > 0) navigate(`/products?q=${encodeURIComponent(q)}`);
-                  }
-                }}
-              />
-              <button
-                style={styles.searchBtn}
-                onClick={() => {
-                  const q = query.trim();
-                  if (q.length > 0) navigate(`/products?q=${encodeURIComponent(q)}`);
-                }}
-                aria-label="Search"
-              >
-                <FiSearch />
-              </button>
+            {/* Search Bar */}
+            <div className="flex-1 max-w-2xl mx-8">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiSearch className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search for products..."
+                  className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-2xl 
+                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                           bg-gray-50 hover:bg-white transition-colors duration-200
+                           text-sm placeholder-gray-500"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <button
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center
+                           text-gray-400 hover:text-blue-600 transition-colors duration-200"
+                  onClick={handleSearch}
+                >
+                  <div className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-lg 
+                                flex items-center justify-center transition-colors duration-200">
+                    <FiSearch className="h-4 w-4 text-white" />
+                  </div>
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* User Actions */}
-          <div style={styles.userActions}>
-            {isAuthenticated ? (
-              <>
-                {/* For regular users (customers) - show cart, wishlist, and profile */}
-                {isCustomer() && (
-                  <>
-                    {/* Cart */}
-                    <div style={styles.actionItem}>
-                      <Link to="/cart" style={styles.actionBtn}>
-                        <FiShoppingCart />
+            {/* User Actions */}
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <>
+                  {/* Customer Actions */}
+                  {isCustomer() && (
+                    <>
+                      {/* Wishlist */}
+                      <Link
+                        to="/wishlist"
+                        className="relative p-2 text-gray-600 hover:text-blue-600 
+                                 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                      >
+                        <FiHeart className="w-6 h-6" />
+                      </Link>
+
+                      {/* Cart */}
+                      <Link
+                        to="/cart"
+                        className="relative p-2 text-gray-600 hover:text-blue-600 
+                                 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                      >
+                        <FiShoppingCart className="w-6 h-6" />
                         {cartCount > 0 && (
-                          <span style={styles.cartBadge}>{cartCount}</span>
+                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 
+                                         text-white text-xs rounded-full flex items-center 
+                                         justify-center font-medium">
+                            {cartCount}
+                          </span>
                         )}
                       </Link>
-                    </div>
+                    </>
+                  )}
 
-                    {/* Wishlist */}
-                    <div style={styles.actionItem}>
-                      <Link to="/wishlist" style={styles.actionBtn}>
-                        <FiHeart />
-                      </Link>
-                    </div>
-                  </>
-                )}
-
-                {/* For vendors and admins - show notifications and dashboard access */}
-                {isVendorOrAdmin() && (
-                  <>
-                    {/* Notifications */}
-                    <div style={styles.actionItem}>
-                      <button style={styles.actionBtn}>
-                        <FiBell />
-                        <span style={styles.notificationBadge}>3</span>
+                  {/* Vendor/Admin Actions */}
+                  {isVendorOrAdmin() && (
+                    <>
+                      {/* Notifications */}
+                      <button className="relative p-2 text-gray-600 hover:text-blue-600 
+                                       hover:bg-blue-50 rounded-xl transition-all duration-200">
+                        <FiBell className="w-6 h-6" />
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 
+                                       text-white text-xs rounded-full flex items-center 
+                                       justify-center font-medium">
+                          3
+                        </span>
                       </button>
-                    </div>
 
-                    {/* Dashboard Link */}
-                    <div style={styles.actionItem}>
+                      {/* Dashboard */}
                       <Link
                         to="/dashboard"
-                        style={styles.actionBtn}
-                        title="Dashboard"
+                        className="relative p-2 text-gray-600 hover:text-blue-600 
+                                 hover:bg-blue-50 rounded-xl transition-all duration-200"
                       >
-                        <FiGrid />
+                        <FiGrid className="w-6 h-6" />
                       </Link>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
 
-                {/* User Profile - All authenticated users */}
-                <div style={styles.actionItem}>
-                  <ProfileModal>
-                    <div style={styles.profileBtn}>
-                      {user?.pic ? (
-                        <img
-                          src={user.pic}
-                          alt={user.name}
-                          style={styles.profileImage}
-                        />
-                      ) : (
-                        <div style={styles.profilePlaceholder}>
-                          <FiUser />
+                  {/* User Profile */}
+                  <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
+                    <div className="relative">
+                      <ProfileModal>
+                        <div className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-xl transition-all duration-200 cursor-pointer">
+                          {user?.pic ? (
+                            <img
+                              src={user.pic}
+                              alt={user.name}
+                              className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-100"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 
+                                          rounded-full flex items-center justify-center">
+                              <FiUser className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                          <div className="hidden lg:block text-left">
+                            <p className="text-sm font-medium text-gray-900">
+                              {user?.name || user?.email}
+                            </p>
+                            <p className="text-xs text-gray-500 capitalize">
+                              {user?.role || 'Customer'}
+                            </p>
+                          </div>
+                          <FiChevronDown className="w-4 h-4 text-gray-400" />
                         </div>
-                      )}
-                      <span style={styles.profileName}>
-                        {user?.name || user?.email}
-                      </span>
+                      </ProfileModal>
                     </div>
-                  </ProfileModal>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 
+                             hover:text-blue-600 transition-colors duration-200"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 
+                             text-white text-sm font-medium rounded-xl 
+                             hover:from-blue-700 hover:to-purple-700 
+                             transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Sign Up
+                  </Link>
                 </div>
-              </>
-            ) : (
-              <Link to="/login" style={styles.loginBtn}>
-                Log In
-              </Link>
-            )}
+              )}
+
+              {/* Mobile Menu Toggle */}
+              <button
+                className="md:hidden p-2 text-gray-600 hover:text-blue-600 
+                         hover:bg-blue-50 rounded-xl transition-all duration-200"
+                onClick={toggleMenu}
+              >
+                {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Navigation Bar */}
-      <nav style={styles.navBar}>
-        <div style={styles.navContainer}>
-          <div style={styles.navLeft}>
-            {/* Categories Dropdown */}
-            {!isMobile && (
-            <div style={styles.categoriesDropdown}>
-              <button
-                style={styles.dropdownBtn}
-                onClick={toggleCategories}
-                onMouseEnter={() => setShowCategories(true)}
-              >
-                All products
-                <FiChevronDown style={styles.chevron} />
-              </button>
-
-              {showCategories && (
-                <div
-                  style={styles.dropdownMenu}
+      <nav className="bg-white border-b border-gray-100 hidden md:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center space-x-8">
+              {/* Categories Dropdown */}
+              <div className="relative">
+                <button
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium 
+                           text-gray-700 hover:text-blue-600 hover:bg-blue-50 
+                           rounded-xl transition-all duration-200"
+                  onMouseEnter={() => setShowCategories(true)}
                   onMouseLeave={() => setShowCategories(false)}
                 >
-                  <Link to="/products" style={styles.dropdownItem}>
-                    Browse All Products
-                  </Link>
-                  <div style={styles.dropdownDivider}></div>
-                  {categories.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/category/${category
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
-                      style={styles.dropdownItem}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-            )}
+                  <FiGrid className="w-4 h-4" />
+                  <span>All Categories</span>
+                  <FiChevronDown className="w-4 h-4" />
+                </button>
 
-            {/* Navigation Links */}
-            <div style={{ ...styles.navLinks, display: isMobile ? 'none' : 'flex' }}>
-              <Link to="/compare" style={styles.navLink}>
-                Compare
-              </Link>
-              <Link to="/new-arrivals" style={styles.navLink}>
-                New arrivals
-              </Link>
-              <Link to="/todays-deal" style={styles.navLink}>
-                Today's deal
-              </Link>
+                {/* Categories Dropdown Menu */}
+                {showCategories && (
+                  <div
+                    className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl 
+                             shadow-xl border border-gray-100 z-50 py-2"
+                    onMouseEnter={() => setShowCategories(true)}
+                    onMouseLeave={() => setShowCategories(false)}
+                  >
+                    <Link
+                      to="/products"
+                      className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 
+                               hover:text-blue-600 transition-colors duration-200 
+                               border-b border-gray-50"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <FiGrid className="w-4 h-4" />
+                        <span className="font-medium">Browse All Products</span>
+                      </div>
+                    </Link>
+                    {categories.map((category) => (
+                      <Link
+                        key={category}
+                        to={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
+                        className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 
+                                 hover:text-blue-600 transition-colors duration-200"
+                      >
+                        {category}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation Links */}
+              <div className="flex items-center space-x-6">
+                <Link
+                  to="/new-arrivals"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 
+                           transition-colors duration-200 relative group"
+                >
+                  New Arrivals
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 
+                                 group-hover:w-full transition-all duration-200"></span>
+                </Link>
+                <Link
+                  to="/todays-deal"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 
+                           transition-colors duration-200 relative group"
+                >
+                  Today's Deals
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 
+                                 group-hover:w-full transition-all duration-200"></span>
+                </Link>
+                <Link
+                  to="/compare"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 
+                           transition-colors duration-200 relative group"
+                >
+                  Compare
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 
+                                 group-hover:w-full transition-all duration-200"></span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right side info */}
+            <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <FiTruck className="w-4 h-4" />
+                <span>Fast Delivery</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <FiPhone className="w-4 h-4" />
+                <span>24/7 Support</span>
+              </div>
             </div>
           </div>
-
-          {/* Mobile Menu Toggle */}
-          <button style={{ ...styles.mobileMenuToggle, display: isMobile ? 'block' : 'none' }} onClick={toggleMenu} aria-label={isOpen ? 'Close menu' : 'Open menu'}>
-            {isOpen ? <FiX /> : <FiMenu />}
-          </button>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div style={styles.mobileMenu} onClick={() => setIsOpen(false)}>
-          <div
-            style={styles.mobileMenuContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                style={styles.mobileMenuItem}
+        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
+          <div className="absolute inset-y-0 right-0 w-80 bg-white shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+              <button
                 onClick={() => setIsOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 
+                         hover:bg-gray-100 rounded-lg transition-all duration-200"
               >
-                {item.name}
-              </Link>
-            ))}
-            <div style={styles.mobileCategories}>
-              <h3 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.1rem' }}>Categories</h3>
-              {categories.map((category) => (
+                <FiX className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {navigation.map((item) => (
                 <Link
-                  key={category}
-                  to={`/category/${category
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                  style={styles.mobileCategoryItem}
+                  key={item.name}
+                  to={item.href}
+                  className="block w-full text-left py-3 px-4 text-gray-700 hover:bg-blue-50 
+                           hover:text-blue-600 rounded-xl transition-all duration-200"
                   onClick={() => setIsOpen(false)}
                 >
-                  {category}
+                  {item.name}
                 </Link>
               ))}
-              <Link to="/products" style={{ ...styles.mobileCategoryItem, borderBottom: 'none' }} onClick={() => setIsOpen(false)}>
-                Browse All Products
-              </Link>
+
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="px-4 text-sm font-semibold text-gray-900 mb-3">Categories</h3>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <Link
+                      key={category}
+                      to={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
+                      className="block w-full text-left py-2 px-4 text-sm text-gray-600 hover:bg-blue-50 
+                               hover:text-blue-600 rounded-lg transition-all duration-200"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {category}
+                    </Link>
+                  ))}
+                  <Link
+                    to="/products"
+                    className="block w-full text-left py-2 px-4 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-all duration-200"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Browse All Products
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

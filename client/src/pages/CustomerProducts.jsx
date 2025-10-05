@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useLocation, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FiStar,
   FiShoppingCart,
@@ -9,491 +8,22 @@ import {
   FiFilter,
   FiGrid,
   FiList,
+  FiPackage,
+  FiSearch,
+  FiX,
+  FiCheck,
+  FiChevronDown,
 } from "react-icons/fi";
 
 const CustomerProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+  const [viewMode, setViewMode] = useState("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [selectedCategory, setSelectedCategory] = useState("all");
-
-  // Inline styles object
-  const styles = {
-    // Base styles
-    customerProductsPage: {
-      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-      color: '#333',
-      maxWidth: '1400px',
-      margin: '0 auto',
-      padding: '0 20px',
-    },
-    
-    // Loading and error states
-    loadingContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '300px',
-      textAlign: 'center',
-    },
-    errorContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '300px',
-      textAlign: 'center',
-      color: '#d32f2f',
-    },
-    loadingSpinner: {
-      fontSize: '1.2rem',
-      color: '#666',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-    },
-    loadingSpinnerBefore: {
-      content: '""',
-      width: '20px',
-      height: '20px',
-      border: '2px solid #f3f3f3',
-      borderTop: '2px solid #3498db',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-    },
-    errorContainerH2: {
-      marginBottom: '10px',
-    },
-    tryAgainButton: {
-      marginTop: '10px',
-      padding: '8px 16px',
-      backgroundColor: '#3498db',
-      color: 'white',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-    },
-    
-    // Page header
-    pageHeader: {
-      backgroundColor: '#f8f9fa',
-      padding: '40px 0',
-      marginBottom: '30px',
-      borderRadius: '8px',
-      textAlign: 'center',
-    },
-    headerContentH1: {
-      fontSize: '2.5rem',
-      marginBottom: '10px',
-      color: '#2c3e50',
-    },
-    headerContentP: {
-      fontSize: '1.1rem',
-      color: '#7f8c8d',
-    },
-    
-    // Controls section
-    controlsSection: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '30px',
-      gap: '20px',
-    },
-    filters: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '20px',
-    },
-    filterGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-    },
-    filterGroupLabel: {
-      fontWeight: '600',
-      fontSize: '0.9rem',
-      color: '#555',
-    },
-    filterSelect: {
-      padding: '8px 12px',
-      border: '1px solid #ddd',
-      borderRadius: '4px',
-      backgroundColor: 'white',
-      color: 'black',
-      fontSize: '0.9rem',
-      minWidth: '180px',
-    },
-    priceInputs: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-    },
-    priceInput: {
-      padding: '8px 12px',
-      border: '1px solid #ddd',
-      backgroundColor: 'white',
-      color: 'black',
-      borderRadius: '4px',
-      width: '80px',
-      fontSize: '0.9rem',
-    },
-    viewControls: {
-      display: 'flex',
-      gap: '10px',
-    },
-    viewBtn: {
-      background: 'none',
-      border: '1px solid #ddd',
-      borderRadius: '4px',
-      padding: '8px 12px',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#555',
-      transition: 'all 0.2s',
-    },
-    viewBtnActive: {
-      background: 'none',
-      border: '1px solid #3498db',
-      borderRadius: '4px',
-      padding: '8px 12px',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      transition: 'all 0.2s',
-      backgroundColor: '#3498db',
-    },
-    
-    // Results info
-    resultsInfo: {
-      marginBottom: '20px',
-      fontSize: '0.9rem',
-      color: '#666',
-    },
-    
-    // Products container
-    productsContainer: {
-      display: 'grid',
-      gap: '25px',
-      marginBottom: '40px',
-    },
-    productsContainerGrid: {
-      display: 'grid',
-      gap: '25px',
-      marginBottom: '40px',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    },
-    productsContainerList: {
-      display: 'grid',
-      gap: '25px',
-      marginBottom: '40px',
-      gridTemplateColumns: '1fr',
-    },
-    
-    // No results
-    noResults: {
-      textAlign: 'center',
-      padding: '40px',
-      gridColumn: '1 / -1',
-    },
-    noResultsH3: {
-      fontSize: '1.5rem',
-      marginBottom: '10px',
-      color: '#555',
-    },
-    noResultsP: {
-      color: '#888',
-    },
-    
-    // Product card
-    productCard: {
-      background: 'white',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      border: '1px solid #eee',
-    },
-    productCardList: {
-      background: 'white',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      display: 'flex',
-      flexDirection: 'row',
-      maxHeight: '200px',
-      border: '1px solid #eee',
-    },
-    productCardHover: {
-      transform: 'translateY(-5px)',
-      boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
-    },
-    
-    // Product link
-    productLink: {
-      textDecoration: 'none',
-      color: 'inherit',
-      width: '200px',
-      height: '250px',
-    },
-    
-    // Product image
-    productImage: {
-      position: 'relative',
-      overflow: 'hidden',
-      width: '200px',
-      height: '250px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    productImageList: {
-      position: 'relative',
-      overflow: 'hidden',
-      width: '200px',
-      height: '200px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexShrink: 0,
-    },
-    productImageImg: {
-      width: '100%',
-      alignSelf: 'center',
-      padding: 0,
-      height: '100%',
-      objectFit: 'contain',
-      transition: 'transform 0.3s',
-    },
-    placeholderImage: {
-      width: '100%',
-      height: '100%',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#7f8c8d',
-      fontSize: '0.9rem',
-      fontWeight: '500',
-      textAlign: 'center',
-      border: '2px dashed #ddd',
-      borderRadius: '4px',
-    },
-    
-    // Product badges
-    productBadges: {
-      position: 'absolute',
-      top: '10px',
-      left: '10px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '5px',
-      zIndex: 2,
-    },
-    badge: {
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '0.7rem',
-      fontWeight: '600',
-      color: 'white',
-    },
-    badgeSale: {
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '0.7rem',
-      fontWeight: '600',
-      color: 'white',
-      backgroundColor: '#e74c3c',
-    },
-    badgeNew: {
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '0.7rem',
-      fontWeight: '600',
-      color: 'white',
-      backgroundColor: '#2ecc71',
-    },
-    badgeOutOfStock: {
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '0.7rem',
-      fontWeight: '600',
-      color: 'white',
-      backgroundColor: '#7f8c8d',
-    },
-    
-    // Product info
-    productInfo: {
-      flexGrow: 1,
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    productInfoList: {
-      flexGrow: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      padding: '20px',
-    },
-    productTitleLink: {
-      textDecoration: 'none',
-      color: 'inherit',
-    },
-    productTitle: {
-      fontSize: '1.1rem',
-      margin: '0 0 5px 0',
-      color: '#2c3e50',
-      transition: 'color 0.2s',
-    },
-    productTitleHover: {
-      color: '#3498db',
-    },
-    productBrand: {
-      fontSize: '0.85rem',
-      color: '#7f8c8d',
-      margin: '0 0 10px 0',
-    },
-    
-    // Product rating
-    productRating: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-      marginBottom: '10px',
-    },
-    stars: {
-      display: 'flex',
-      gap: '2px',
-    },
-    starFilled: {
-      color: '#f39c12',
-      fill: '#f39c12',
-    },
-    ratingText: {
-      fontSize: '0.8rem',
-      color: '#7f8c8d',
-    },
-    
-    // Product price
-    productPrice: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      margin: '10px 0',
-      flexWrap: 'wrap',
-    },
-    currentPrice: {
-      fontSize: '1.2rem',
-      fontWeight: '700',
-      color: '#2c3e50',
-    },
-    originalPrice: {
-      fontSize: '0.9rem',
-      color: '#95a5a6',
-      textDecoration: 'line-through',
-    },
-    discountBadge: {
-      fontSize: '0.8rem',
-      backgroundColor: '#e74c3c',
-      color: 'white',
-      padding: '2px 6px',
-      borderRadius: '4px',
-      fontWeight: '600',
-    },
-    
-    // Product stock
-    productStock: {
-      margin: '5px 0 15px 0',
-    },
-    stockBadge: {
-      fontSize: '0.8rem',
-      padding: '3px 8px',
-      borderRadius: '4px',
-      fontWeight: '600',
-    },
-    stockBadgeInStock: {
-      fontSize: '0.8rem',
-      padding: '3px 8px',
-      borderRadius: '4px',
-      fontWeight: '600',
-      backgroundColor: '#e8f8f5',
-      color: '#27ae60',
-    },
-    stockBadgeOutOfStock: {
-      fontSize: '0.8rem',
-      padding: '3px 8px',
-      borderRadius: '4px',
-      fontWeight: '600',
-      backgroundColor: '#fdedec',
-      color: '#e74c3c',
-    },
-    
-    // Product actions
-    productActions: {
-      display: 'flex',
-      gap: '10px',
-      marginTop: 'auto',
-      marginBottom: 0,
-    },
-    btnPrimary: {
-      border: 'none',
-      padding: '8px 16px',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-      fontSize: '0.9rem',
-      transition: 'all 0.2s',
-      backgroundColor: '#3498db',
-      color: 'white',
-      flexGrow: 1,
-      justifyContent: 'center',
-    },
-    btnPrimaryDisabled: {
-      border: 'none',
-      padding: '8px 16px',
-      borderRadius: '4px',
-      cursor: 'not-allowed',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-      fontSize: '0.9rem',
-      transition: 'all 0.2s',
-      backgroundColor: '#bdc3c7',
-      color: '#7f8c8d',
-      flexGrow: 1,
-      justifyContent: 'center',
-    },
-    btnSecondary: {
-      border: '1px solid #ddd',
-      padding: '8px 16px',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-      fontSize: '0.9rem',
-      transition: 'all 0.2s',
-      backgroundColor: 'white',
-      color: '#7f8c8d',
-      width: '40px',
-      justifyContent: 'center',
-    },
-  };
+  const [showFilters, setShowFilters] = useState(true);
 
   const location = useLocation();
 
@@ -509,8 +39,6 @@ const CustomerProducts = () => {
         }
 
         const data = await response.json();
-        
-        // Handle both possible response structures
         const productsData = data.products || data || [];
         setProducts(Array.isArray(productsData) ? productsData : []);
       } catch (err) {
@@ -524,7 +52,6 @@ const CustomerProducts = () => {
     fetchProducts();
   }, [location.search]);
 
-  // Extract q from URL
   const searchParams = new URLSearchParams(location.search);
   const q = (searchParams.get('q') || '').trim().toLowerCase();
 
@@ -587,7 +114,6 @@ const CustomerProducts = () => {
     "home appliances",
   ];
 
-  // Helper function to safely get product image
   const getProductImage = (product) => {
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
       return product.images[0];
@@ -595,14 +121,12 @@ const CustomerProducts = () => {
     return null;
   };
 
-  // Helper function to check if product is new (within 7 days)
   const isProductNew = (product) => {
     if (!product.createdAt) return false;
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     return new Date(product.createdAt) > sevenDaysAgo;
   };
 
-  // Helper function to calculate discount percentage
   const getDiscountPercentage = (product) => {
     if (!product.originalPrice || !product.price || product.originalPrice <= product.price) {
       return 0;
@@ -610,14 +134,18 @@ const CustomerProducts = () => {
     return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   };
 
+  const clearFilters = () => {
+    setSelectedCategory("all");
+    setPriceRange({ min: "", max: "" });
+    setSortBy("newest");
+  };
+
   if (loading) {
     return (
-      <div style={styles.customerProductsPage}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.loadingSpinner}>
-            <div style={styles.loadingSpinnerBefore}></div>
-            Loading products...
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6 mx-auto" />
+          <p className="text-gray-700 font-semibold text-lg">Loading products...</p>
         </div>
       </div>
     );
@@ -625,13 +153,16 @@ const CustomerProducts = () => {
 
   if (error) {
     return (
-      <div style={styles.customerProductsPage}>
-        <div style={styles.errorContainer}>
-          <h2 style={styles.errorContainerH2}>Error Loading Products</h2>
-          <p>{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            style={styles.tryAgainButton}
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-12 max-w-md text-center">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FiPackage className="w-10 h-10 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Error Loading Products</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 font-semibold transition-all"
           >
             Try Again
           </button>
@@ -641,223 +172,310 @@ const CustomerProducts = () => {
   }
 
   return (
-    <div style={styles.customerProductsPage}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40">
       {/* Header */}
-      <div style={styles.pageHeader}>
-        <div>
-          <h1 style={styles.headerContentH1}>All Products</h1>
-          <p style={styles.headerContentP}>
-            {q ? `Search results for "${q}"` : 'Discover amazing products from our trusted vendors'}
-          </p>
+      <div className="bg-white/95 backdrop-blur-lg border-b border-gray-200/80 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                {q ? 'Search Results' : 'All Products'}
+              </h1>
+              <p className="text-gray-600">
+                {q ? (
+                  <>Showing results for <span className="font-semibold text-blue-600">"{q}"</span></>
+                ) : (
+                  'Discover amazing products from our trusted vendors'
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Results Info Bar */}
+          <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200/50">
+            <div className="flex items-center gap-2">
+              <FiPackage className="w-5 h-5 text-blue-600" />
+              <span className="text-gray-700 font-medium">
+                Showing <span className="font-bold text-blue-600">{filteredAndSortedProducts.length}</span> of <span className="font-bold">{products.length}</span> products
+              </span>
+            </div>
+            {(selectedCategory !== "all" || priceRange.min || priceRange.max || sortBy !== "newest") && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold"
+              >
+                <FiX className="w-4 h-4" />
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div>
-        {/* Filters and Controls */}
-        <div style={styles.controlsSection}>
-          <div style={styles.filters}>
-            <div style={styles.filterGroup}>
-              <label style={styles.filterGroupLabel}>Category:</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                style={styles.filterSelect}
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category === "all"
-                      ? "All Categories"
-                      : category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filters Section */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-6 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 text-gray-900 font-bold text-lg"
+            >
+              <FiFilter className="w-5 h-5 text-blue-600" />
+              Filters & Sorting
+              <FiChevronDown className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </button>
 
-            <div style={styles.filterGroup}>
-              <label style={styles.filterGroupLabel}>Price Range:</label>
-              <div style={styles.priceInputs}>
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={priceRange.min}
-                  onChange={(e) =>
-                    setPriceRange((prev) => ({ ...prev, min: e.target.value }))
-                  }
-                  style={styles.priceInput}
-                />
-                <span>-</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={priceRange.max}
-                  onChange={(e) =>
-                    setPriceRange((prev) => ({ ...prev, max: e.target.value }))
-                  }
-                  style={styles.priceInput}
-                />
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600 font-medium">View:</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${viewMode === "grid"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                >
+                  <FiGrid className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${viewMode === "list"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                >
+                  <FiList className="w-5 h-5" />
+                </button>
               </div>
             </div>
+          </div>
 
-            <div style={styles.filterGroup}>
-              <label style={styles.filterGroupLabel}>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                style={styles.filterSelect}
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
               >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name A-Z</option>
-              </select>
-            </div>
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
+                  {/* Category Filter */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Category</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 font-medium"
+                    >
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category === "all"
+                            ? "All Categories"
+                            : category.charAt(0).toUpperCase() + category.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-          <div style={styles.viewControls}>
-            <button
-              style={viewMode === "grid" ? styles.viewBtnActive : styles.viewBtn}
-              onClick={() => setViewMode("grid")}
-            >
-              <FiGrid />
-            </button>
-            <button
-              style={viewMode === "list" ? styles.viewBtnActive : styles.viewBtn}
-              onClick={() => setViewMode("list")}
-            >
-              <FiList />
-            </button>
-          </div>
-        </div>
+                  {/* Price Range */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Min Price (PKR)</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={priceRange.min}
+                      onChange={(e) => setPriceRange((prev) => ({ ...prev, min: e.target.value }))}
+                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 font-medium"
+                    />
+                  </div>
 
-        {/* Results Count */}
-        <div style={styles.resultsInfo}>
-          <p>
-            Showing {filteredAndSortedProducts.length} of {products.length}{" "}
-            products
-            {products.length === 0 && (
-              <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>
-                {" "}- No products available in the database
-              </span>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Max Price (PKR)</label>
+                    <input
+                      type="number"
+                      placeholder="999999"
+                      value={priceRange.max}
+                      onChange={(e) => setPriceRange((prev) => ({ ...prev, max: e.target.value }))}
+                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 font-medium"
+                    />
+                  </div>
+
+                  {/* Sort By */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Sort By</label>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 font-medium"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="name">Name A-Z</option>
+                    </select>
+                  </div>
+                </div>
+              </motion.div>
             )}
-          </p>
+          </AnimatePresence>
         </div>
 
         {/* Products Grid/List */}
-        <div style={viewMode === "grid" ? styles.productsContainerGrid : styles.productsContainerList}>
-          {filteredAndSortedProducts.length === 0 ? (
-            <div style={styles.noResults}>
-              <h3 style={styles.noResultsH3}>No products found</h3>
-              <p style={styles.noResultsP}>Try adjusting your filters or search criteria</p>
+        {filteredAndSortedProducts.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-16 text-center">
+            <div className="w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <FiSearch className="w-14 h-14 text-gray-400" />
             </div>
-          ) : (
-            filteredAndSortedProducts.map((product) => (
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">No Products Found</h3>
+            <p className="text-gray-600 mb-6">Try adjusting your filters or search criteria</p>
+            {(selectedCategory !== "all" || priceRange.min || priceRange.max) && (
+              <button
+                onClick={clearFilters}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 font-semibold transition-all"
+              >
+                Clear All Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className={`grid gap-6 ${viewMode === "grid"
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "grid-cols-1"
+            }`}>
+            {filteredAndSortedProducts.map((product, index) => (
               <motion.div
                 key={product._id}
-                style={viewMode === "list" ? styles.productCardList : styles.productCard}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                whileHover={{ 
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
-                }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className={`bg-white rounded-2xl shadow-lg border border-gray-200/80 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${viewMode === "list" ? "flex flex-row" : "flex flex-col"
+                  }`}
               >
-                <Link to={`/product/${product._id}`} style={styles.productLink}>
-                  <div style={viewMode === "list" ? styles.productImageList : styles.productImage}>
-                    {/* Product Badges */}
-                    <div style={styles.productBadges}>
-                      {(product.quantity || 0) === 0 && (
-                        <span style={styles.badgeOutOfStock}>Out of Stock</span>
-                      )}
-                      {getDiscountPercentage(product) > 0 && (
-                        <span style={styles.badgeSale}>Sale</span>
-                      )}
-                      {isProductNew(product) && (
-                        <span style={styles.badgeNew}>New</span>
-                      )}
-                    </div>
-
-                    {/* Product Image */}
-                    {getProductImage(product) ? (
-                      <img
-                        src={getProductImage(product)}
-                        alt={product.name || "Product"}
-                        style={styles.productImageImg}
-                        onError={(e) => {
-                          e.target.src = "/placeholder-product.jpg";
-                        }}
-                      />
-                    ) : (
-                      <div style={styles.placeholderImage}>No Image</div>
+                {/* Product Image */}
+                <Link
+                  to={`/product/${product._id}`}
+                  className={`relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 ${viewMode === "list" ? "w-64 h-64 flex-shrink-0" : "w-full aspect-square"
+                    }`}
+                >
+                  {/* Badges */}
+                  <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                    {product.quantity === 0 && (
+                      <span className="px-3 py-1 bg-gray-600 text-white text-xs font-bold rounded-lg shadow-lg">
+                        Out of Stock
+                      </span>
+                    )}
+                    {getDiscountPercentage(product) > 0 && (
+                      <span className="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-lg shadow-lg">
+                        {getDiscountPercentage(product)}% OFF
+                      </span>
+                    )}
+                    {isProductNew(product) && (
+                      <span className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-lg shadow-lg">
+                        New
+                      </span>
                     )}
                   </div>
+
+                  {getProductImage(product) ? (
+                    <img
+                      src={getProductImage(product)}
+                      alt={product.name || "Product"}
+                      className="w-full h-full object-contain p-6 hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.src = "/placeholder-product.jpg";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <FiPackage className="w-16 h-16 text-gray-300 mx-auto mb-2" />
+                        <span className="text-gray-400 text-sm font-medium">No Image</span>
+                      </div>
+                    </div>
+                  )}
                 </Link>
 
-                <div style={viewMode === "list" ? styles.productInfoList : styles.productInfo}>
-                  <Link
-                    to={`/product/${product._id}`}
-                    style={styles.productTitleLink}
-                  >
-                    <h3 style={styles.productTitle}>{product.name || "Unnamed Product"}</h3>
+                {/* Product Info */}
+                <div className={`p-6 flex flex-col ${viewMode === "list" ? "flex-1" : ""}`}>
+                  <Link to={`/product/${product._id}`} className="group">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      {product.name || "Unnamed Product"}
+                    </h3>
                   </Link>
 
                   {product.brand && (
-                    <p style={styles.productBrand}>{product.brand}</p>
+                    <p className="text-sm text-gray-500 font-medium mb-3">{product.brand}</p>
                   )}
 
-                  <div style={styles.productRating}>
-                    <div style={styles.stars}>
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <FiStar
                           key={star}
-                          style={star <= 4 ? styles.starFilled : {}}
+                          className={`w-4 h-4 ${star <= 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                            }`}
                         />
                       ))}
                     </div>
-                    <span style={styles.ratingText}>4.0 (128 reviews)</span>
+                    <span className="text-sm text-gray-600 font-medium">4.0</span>
+                    <span className="text-sm text-gray-400">(128)</span>
                   </div>
 
-                  <div style={styles.productPrice}>
-                    <span style={styles.currentPrice}>
+                  {/* Price */}
+                  <div className="flex items-end gap-3 mb-4">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                       PKR {(product.price || 0).toLocaleString()}
                     </span>
                     {getDiscountPercentage(product) > 0 && (
-                      <>
-                        <span style={styles.originalPrice}>
-                          PKR {(product.originalPrice || 0).toLocaleString()}
-                        </span>
-                        <span style={styles.discountBadge}>
-                          -{getDiscountPercentage(product)}%
-                        </span>
-                      </>
+                      <span className="text-sm text-gray-400 line-through mb-1">
+                        PKR {(product.originalPrice || 0).toLocaleString()}
+                      </span>
                     )}
                   </div>
 
-                  <div style={styles.productStock}>
-                    <span
-                      style={(product.quantity || 0) > 0 ? styles.stockBadgeInStock : styles.stockBadgeOutOfStock}
-                    >
-                      {(product.quantity || 0) > 0 ? "In Stock" : "Out of Stock"}
+                  {/* Stock Status */}
+                  <div className="mb-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg ${product.quantity > 0
+                        ? "bg-green-100 text-green-700 border border-green-200"
+                        : "bg-red-100 text-red-700 border border-red-200"
+                      }`}>
+                      {product.quantity > 0 ? (
+                        <>
+                          <FiCheck className="w-3.5 h-3.5" />
+                          In Stock
+                        </>
+                      ) : (
+                        <>
+                          <FiX className="w-3.5 h-3.5" />
+                          Out of Stock
+                        </>
+                      )}
                     </span>
                   </div>
 
-                  <div style={styles.productActions}>
-                    <button 
-                      style={(product.quantity || 0) === 0 ? styles.btnPrimaryDisabled : styles.btnPrimary}
-                      disabled={(product.quantity || 0) === 0}
+                  {/* Actions */}
+                  <div className="flex gap-3 mt-auto">
+                    <button
+                      disabled={product.quantity === 0}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${product.quantity === 0
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                        }`}
                     >
-                      <FiShoppingCart /> 
-                      {(product.quantity || 0) === 0 ? "Out of Stock" : "Add to Cart"}
+                      <FiShoppingCart className="w-4 h-4" />
+                      {product.quantity === 0 ? "Out of Stock" : "Add to Cart"}
                     </button>
-                    <button style={styles.btnSecondary}>
-                      <FiHeart />
+                    <button className="w-12 h-12 flex items-center justify-center bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:border-red-400 hover:text-red-600 hover:bg-red-50 transition-all shadow-md">
+                      <FiHeart className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
               </motion.div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

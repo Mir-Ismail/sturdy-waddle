@@ -1,15 +1,30 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FiTrendingUp,
+  FiStar,
+  FiEye,
+  FiShoppingCart,
+  FiArrowRight,
+  FiZap,
+  FiPackage,
+  FiRefreshCw,
+  FiChevronRight,
+  FiHeart,
+  FiPlus,
+  FiBarChart2
+} from "react-icons/fi";
 import HeroSection from "../components/sections/heroSection";
 import ProductSection from "../components/sections/ProductSection";
 import EmptyState from "../components/sections/EmptyState";
 import axios from "axios";
-import "../Styles/Home.css";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -37,7 +52,6 @@ const Home = () => {
   };
 
   const getTrendingProducts = () => {
-    // Sort by views or sales in a real app
     return [...products]
       .sort((a, b) => (b.views || 0) - (a.views || 0))
       .slice(0, 8);
@@ -49,6 +63,16 @@ const Home = () => {
     );
   };
 
+  const getFeaturedProducts = () => {
+    return products.filter(product => product.featured === true).slice(0, 8);
+  };
+
+  const getBestSellers = () => {
+    return [...products]
+      .sort((a, b) => (b.sales || 0) - (a.sales || 0))
+      .slice(0, 8);
+  };
+
   const getElectronicsProducts = () => {
     const electronicsCategories = [
       "pcs & laptop",
@@ -58,54 +82,78 @@ const Home = () => {
     ];
     return products.filter((product) =>
       electronicsCategories.includes(product.category?.toLowerCase())
-    );
+    ).slice(0, 8);
   };
 
-  const getOtherProducts = () => {
-    const mainCategories = [
-      "pcs & laptop",
-      "gadgets",
-      "audio & video",
-      "smart home",
+  const getHomeAppliancesProducts = () => {
+    const homeCategories = [
       "air conditioner",
       "kitchen appliances",
       "refrigerator",
       "home appliances",
     ];
-    return products.filter(
-      (product) => !mainCategories.includes(product.category?.toLowerCase())
-    );
+    return products.filter((product) =>
+      homeCategories.includes(product.category?.toLowerCase())
+    ).slice(0, 8);
   };
 
   const getUniqueCategories = () => {
     const categories = [
       ...new Set(products.map((product) => product.category)),
     ].filter(Boolean);
-
-    // Sort categories alphabetically
     return categories.sort((a, b) => a.localeCompare(b));
   };
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading amazing products...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-r-purple-600 rounded-full animate-spin animate-reverse"></div>
+          </div>
+          <div className="text-center space-y-3">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Loading Amazing Products
+            </h2>
+            <p className="text-gray-600 max-w-md">
+              We're fetching the latest products from our vendors. This won't take long!
+            </p>
+            <div className="flex items-center justify-center space-x-2 mt-4">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce delay-100"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-200"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error-container">
-        <h2>Oops! Something went wrong</h2>
-        <p>{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="retry-button"
-        >
-          Try Again
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 px-4">
+          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center">
+            <FiRefreshCw className="w-12 h-12 text-red-500" />
+          </div>
+          <div className="text-center space-y-4 max-w-md">
+            <h2 className="text-3xl font-bold text-gray-900">Oops! Something went wrong</h2>
+            <p className="text-gray-600 text-lg">{error}</p>
+            <p className="text-sm text-gray-500">
+              Don't worry, our team has been notified and we're working to fix this issue.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 
+                       text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 
+                       transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <FiRefreshCw className="w-5 h-5" />
+              <span>Try Again</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -113,75 +161,500 @@ const Home = () => {
   // Calculate all product sections
   const newArrivals = getNewArrivals();
   const trendingProducts = getTrendingProducts();
+  const featuredProducts = getFeaturedProducts();
+  const bestSellers = getBestSellers();
   const electronicsProducts = getElectronicsProducts();
-  const otherProducts = getOtherProducts();
+  const homeAppliancesProducts = getHomeAppliancesProducts();
   const categories = getUniqueCategories();
 
   return (
     <motion.div
-      className="home-page"
+      className="min-h-screen bg-gray-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6 }}
     >
+      {/* Hero Section */}
       <HeroSection />
 
-      {/* New Arrivals */}
-      <ProductSection
-        title="New Arrivals"
-        subtitle="Fresh products just added to our collection"
-        products={newArrivals}
-        loading={loading}
-      />
+      {/* Main Content Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      {/* Trending Products */}
-      <ProductSection
-        title="Trending Now"
-        subtitle="Most popular products this week"
-        products={trendingProducts}
-        loading={loading}
-      />
+        {/* Quick Stats Bar - More compact */}
+        <section className="py-8 -mt-16 relative z-10">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-gray-900">{products.length}+</div>
+                <div className="text-sm text-gray-600">Products</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-gray-900">{categories.length}+</div>
+                <div className="text-sm text-gray-600">Categories</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-gray-900">4.8</div>
+                <div className="text-sm text-gray-600">Rating</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-gray-900">24/7</div>
+                <div className="text-sm text-gray-600">Support</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* Electronics
-      <ProductSection
-        title="Electronics"
-        subtitle="Latest gadgets and tech innovations"
-        products={electronicsProducts}
-        loading={loading}
-      /> */}
-
-      {/* Category Sections */}
-      <div className="chking">
-        {categories.map((category) => (
-          <ProductSection
-            key={category}
-            title={category}
-            subtitle={`Best ${category.toLowerCase()} for you`}
-            products={getProductsByCategory(category)}
-            loading={loading}
+        {/* Best Sellers - Clean White Background */}
+        {bestSellers.length > 0 && (
+          <CleanProductSection
+            title="Best Sellers"
+            subtitle="Top-rated products by our customers"
+            products={bestSellers}
+            showViewAll={true}
+            viewAllLink="/products?sort=bestselling"
+            icon={<FiStar className="w-5 h-5 text-yellow-500" />}
           />
-        ))}
+        )}
+
+        {/* Latest Electronics - Prominent Background */}
+        {electronicsProducts.length > 0 && (
+          <ProminentProductSection
+            title="Latest Electronics"
+            subtitle="Discover cutting-edge technology"
+            products={electronicsProducts}
+            bgColor="from-blue-600 to-blue-800"
+            viewAllLink="/category/electronics"
+          />
+        )}
+
+        {/* New Arrivals - Clean White Background */}
+        <CleanProductSection
+          title="New Arrivals"
+          subtitle="Fresh products just added to our collection"
+          products={newArrivals}
+          showViewAll={true}
+          viewAllLink="/new-arrivals"
+          icon={<FiZap className="w-5 h-5 text-green-500" />}
+        />
+
+        {/* Home Appliances - Prominent Background */}
+        {homeAppliancesProducts.length > 0 && (
+          <ProminentProductSection
+            title="Home Appliances"
+            subtitle="Smart solutions for modern homes"
+            products={homeAppliancesProducts}
+            bgColor="from-purple-600 to-purple-800"
+            viewAllLink="/category/home-appliances"
+          />
+        )}
+
+        {/* Trending Now - Clean White Background */}
+        <CleanProductSection
+          title="Trending Now"
+          subtitle="Most popular products this week"
+          products={trendingProducts}
+          showViewAll={true}
+          viewAllLink="/products?sort=trending"
+          icon={<FiTrendingUp className="w-5 h-5 text-red-500" />}
+        />
+
+        {/* Featured Products */}
+        {featuredProducts.length > 0 && (
+          <CleanProductSection
+            title="Featured Products"
+            subtitle="Handpicked by our team"
+            products={featuredProducts}
+            showViewAll={true}
+            viewAllLink="/products?featured=true"
+            icon={<FiStar className="w-5 h-5 text-yellow-500" />}
+          />
+        )}
+
+        {/* Category Sections - Using your original ProductSection component */}
+        <div className="chking">
+          {categories.slice(0, 6).map((category, index) => (
+            <ProductSection
+              key={category}
+              title={category}
+              subtitle={`Best ${category.toLowerCase()} products for you`}
+              products={getProductsByCategory(category)}
+              loading={loading}
+              showViewAll={getProductsByCategory(category).length > 6}
+              viewAllLink={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
+            />
+          ))}
+        </div>
+
+        {/* View All Categories */}
+        {categories.length > 6 && (
+          <div className="text-center mt-12 pb-8">
+            <Link
+              to="/products"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-900 hover:bg-black text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <FiPackage className="w-5 h-5" />
+              <span>Explore All Categories</span>
+              <FiArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {products.length === 0 && !loading && (
+          <section className="py-12">
+            <EmptyState
+              title="No Products Available Yet"
+              message="We're working hard to bring you amazing products. Our vendors are setting up their stores!"
+              icon="🏪"
+              showButton={false}
+              size="default"
+            />
+          </section>
+        )}
       </div>
-
-      {/* Other Products */}
-      {otherProducts.length > 0 && (
-        <ProductSection
-          title="More Products"
-          subtitle="Discover more amazing items"
-          products={otherProducts}
-          loading={loading}
-        />
-      )}
-
-      {/* Empty State */}
-      {products.length === 0 && !loading && (
-        <EmptyState
-          title="No Products Available"
-          message="We're working hard to bring you amazing products. Check back soon!"
-          icon="🛍️"
-        />
-      )}
     </motion.div>
+  );
+};
+
+// Clean White Section Component
+const CleanProductSection = ({ title, subtitle, products, showViewAll, viewAllLink, icon }) => {
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="py-8">
+      <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-3">
+            {icon}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+              <p className="text-gray-600 mt-1">{subtitle}</p>
+            </div>
+          </div>
+          {showViewAll && (
+            <Link
+              to={viewAllLink}
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            >
+              <span>View All</span>
+              <FiChevronRight className="w-4 h-4" />
+            </Link>
+          )}
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.slice(0, 8).map((product) => (
+            <EnhancedProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Prominent Background Section Component
+const ProminentProductSection = ({ title, subtitle, products, bgColor, viewAllLink }) => {
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="py-8">
+      <div className={`bg-gradient-to-r ${bgColor} rounded-2xl p-8 text-white shadow-lg`}>
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-white">{title}</h2>
+            <p className="text-blue-100 mt-1">{subtitle}</p>
+          </div>
+          <Link
+            to={viewAllLink}
+            className="flex items-center space-x-2 text-white hover:text-blue-100 font-medium transition-colors"
+          >
+            <span>View All</span>
+            <FiChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.slice(0, 8).map((product) => (
+            <EnhancedProductCard key={product._id} product={product} isDark={true} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Enhanced Product Card with Full Functionality
+const EnhancedProductCard = ({ product, isDark = false }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const navigate = useNavigate();
+
+  const cardBg = isDark ? "bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20" : "bg-white border-gray-200";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const subtextColor = isDark ? "text-blue-100" : "text-gray-600";
+
+  // Format price
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(price);
+  };
+
+  // Get rating stars
+  const getRatingStars = (rating = 4.5) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <FiStar
+          key={i}
+          className="w-4 h-4 text-yellow-400 fill-current"
+        />
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <FiStar
+          key="half"
+          className="w-4 h-4 text-yellow-400 fill-current opacity-70"
+        />
+      );
+    }
+
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <FiStar
+          key={`empty-${i}`}
+          className="w-4 h-4 text-gray-300"
+        />
+      );
+    }
+
+    return stars;
+  };
+
+  // Action handlers with API calls
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await axios.post("http://localhost:5000/api/user/cart", {
+        productId: product._id,
+        quantity: 1
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        // Show success notification
+        alert("Added to cart successfully!");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Failed to add to cart. Please try again.");
+    }
+  };
+
+  const handleAddToWishlist = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      if (isWishlisted) {
+        // Remove from wishlist
+        await axios.delete(`http://localhost:5000/api/user/wishlist/${product._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setIsWishlisted(false);
+      } else {
+        // Add to wishlist
+        await axios.post("http://localhost:5000/api/user/wishlist", {
+          productId: product._id
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setIsWishlisted(true);
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      alert("Failed to update wishlist. Please try again.");
+    }
+  };
+
+  const handleQuickView = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Implement quick view modal
+    console.log("Quick view:", product.name);
+  };
+
+  const handleCompare = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/compare', { state: { productToCompare: product } });
+  };
+
+  return (
+    <Link
+      to={`/product/${product._id}`}
+      className="group block"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className={`${cardBg} border rounded-xl p-4 hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1 relative overflow-hidden`}>
+
+        {/* Product Image */}
+        <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden relative">
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.src = "/placeholder-product.jpg";
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <FiPackage className="w-8 h-8" />
+            </div>
+          )}
+
+          {/* Status Badges */}
+          {product.status === "revoked" && (
+            <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md">
+              Unavailable
+            </div>
+          )}
+
+          {new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) && (
+            <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-md">
+              New
+            </div>
+          )}
+
+          {/* Discount Badge */}
+          {product.originalPrice && product.originalPrice > product.price && (
+            <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md">
+              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+            </div>
+          )}
+
+          {/* Hover Actions Overlay */}
+          <div className={`absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-2 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
+            }`}>
+            <button
+              onClick={handleAddToCart}
+              className="bg-white text-gray-900 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-200 transform hover:scale-110"
+              title="Add to Cart"
+            >
+              <FiShoppingCart className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleAddToWishlist}
+              className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${isWishlisted
+                ? 'bg-red-500 text-white'
+                : 'bg-white text-gray-900 hover:bg-red-500 hover:text-white'
+                }`}
+              title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <FiHeart className="w-4 h-4  " />
+            </button>
+            <button
+              onClick={handleQuickView}
+              className="bg-white text-gray-900 p-2 rounded-full hover:bg-green-500 hover:text-white transition-all duration-200 transform hover:scale-110"
+              title="Quick View"
+            >
+              <FiEye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleCompare}
+              className="bg-white text-gray-900 p-2 rounded-full hover:bg-purple-500 hover:text-white transition-all duration-200 transform hover:scale-110"
+              title="Compare"
+            >
+              <FiBarChart2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Product Info */}
+        <div className="space-y-2">
+          {/* Category */}
+          {product.category && (
+            <p className={`text-xs ${subtextColor} uppercase tracking-wide`}>{product.category}</p>
+          )}
+
+          <h3 className={`font-medium ${textColor} line-clamp-2 group-hover:text-blue-600 transition-colors text-sm leading-tight`}>
+            {product.name}
+          </h3>
+
+          {product.brand && (
+            <p className={`text-xs ${subtextColor} font-medium`}>{product.brand}</p>
+          )}
+
+          {/* Rating */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1">
+              <div className="flex">
+                {getRatingStars()}
+              </div>
+              <span className={`text-xs ${subtextColor}`}>
+                (4.5)
+              </span>
+            </div>
+          </div>
+
+          {/* Price */}
+          <div className="flex items-center space-x-2">
+            <span className={`font-bold ${textColor} text-lg`}>
+              {formatPrice(product.price)}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className={`text-sm ${subtextColor} line-through`}>
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+          </div>
+
+          {/* Stock Status */}
+          <div className="text-xs">
+            {product.quantity > 0 ? (
+              <span className="text-green-600 font-medium">{product.quantity} available</span>
+            ) : (
+              <span className="text-red-500 font-medium">Out of stock</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 };
 

@@ -64,4 +64,5 @@ router.delete('/wishlist/:productId', removeFromWishlist);
 // Check if product is in wishlist
 router.get('/wishlist/check/:productId', checkWishlistStatus);
 
+
 export default router; 

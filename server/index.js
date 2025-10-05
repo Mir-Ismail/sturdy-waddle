@@ -63,14 +63,14 @@ app.get("/api/health", (req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  
+
   // Handle payload too large error
   if (err.type === 'entity.too.large') {
-    return res.status(413).json({ 
-      error: "Payload too large. Please reduce image size or number of images." 
+    return res.status(413).json({
+      error: "Payload too large. Please reduce image size or number of images."
     });
   }
-  
+
   res.status(500).json({ error: "Internal Server Error" });
 });
 

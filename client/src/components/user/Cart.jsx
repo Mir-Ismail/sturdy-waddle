@@ -1,308 +1,281 @@
+'use client';
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  FiTrash2,
-  FiShoppingCart,
-  FiEye,
-  FiMinus,
-  FiPlus,
-  FiArrowLeft,
-  FiPackage,
-  FiTruck,
-  FiCreditCard,
+  FiTrash2, FiShoppingCart, FiEye, FiMinus, FiPlus, FiArrowLeft,
+  FiCreditCard, FiHeart, FiStar, FiX, FiAlertCircle
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import axios from "axios";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [updating, setUpdating] = useState({});
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const navigate = useNavigate();
-  const { removeFromCart, updateCartItemQuantity } = useCart();
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
+  useEffect(() => { fetchCart(); }, []);
 
   const fetchCart = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
         setError("Please login to view your cart");
-        setLoading(false);
         return;
       }
-
-      const response = await fetch("http://localhost:5000/api/user/cart", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+      const res = await axios.get("http://localhost:5000/api/user/cart", {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch cart");
-      }
-
-      const data = await response.json();
+      // ✅ Ensure it's always an array
+      const data = Array.isArray(res.data) ? res.data : [];
       setCartItems(data);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to fetch cart");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateQuantity = async (productId, newQuantity) => {
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: '', type: '' }), 3000);
+  };
+
+  const handleUpdateQuantity = async (id, newQty) => {
+    if (newQty < 1) return;
+    setUpdating(prev => ({ ...prev, [id]: true }));
     try {
-      await updateCartItemQuantity(productId, newQuantity);
-      // Refresh cart after update
-      await fetchCart();
-    } catch (err) {
-      setError(err.message);
+      const token = localStorage.getItem("token");
+      await axios.put(`http://localhost:5000/api/user/cart/${id}`, { quantity: newQty },
+        { headers: { Authorization: `Bearer ${token}` } });
+      setCartItems(prev => prev.map(i =>
+        i.productId._id === id ? { ...i, quantity: newQty } : i));
+      showNotification("Quantity updated");
+    } catch {
+      showNotification("Failed to update", "error");
+    } finally {
+      setUpdating(prev => ({ ...prev, [id]: false }));
     }
   };
 
-  const handleRemoveFromCart = async (productId) => {
+  const handleRemove = async (id) => {
+    setUpdating(prev => ({ ...prev, [id]: true }));
     try {
-      await removeFromCart(productId);
-      // Refresh cart after removal
-      await fetchCart();
-    } catch (err) {
-      setError(err.message);
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/user/cart/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCartItems(prev => prev.filter(i => i.productId._id !== id));
+      showNotification("Item removed");
+    } catch {
+      showNotification("Failed to remove", "error");
+    } finally {
+      setUpdating(prev => ({ ...prev, [id]: false }));
     }
   };
 
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => {
-      return total + item.priceAtTimeOfAdding * item.quantity;
-    }, 0);
+  const addToWishlist = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post("http://localhost:5000/api/user/wishlist", { productId: id }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showNotification("Added to wishlist");
+    } catch {
+      showNotification("Failed to add", "error");
+    }
   };
 
-  const calculateSubtotal = () => {
-    return calculateTotal();
-  };
+  const subtotal = cartItems.reduce((sum, i) => sum + (i.priceAtTimeOfAdding || 0) * (i.quantity || 1), 0);
+  const shipping = subtotal > 100 ? 0 : 10;
+  const total = subtotal + shipping;
+  const format = (p) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(p);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your cart...</p>
-        </div>
+  // 🌀 Loader
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="relative">
+        <div className="w-20 h-20 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-r-purple-600 rounded-full animate-spin animate-reverse"></div>
       </div>
-    );
-  }
+      <p className="mt-6 text-lg text-gray-700 font-medium">Loading your cart...</p>
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="bg-red-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <FiShoppingCart className="text-red-600 text-2xl" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Cart</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Link
-            to="/login"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <FiArrowLeft className="mr-2" />
-            Go to Login
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // ❌ Error
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
+      <FiAlertCircle className="text-red-500 w-16 h-16 mb-4" />
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">Cart Error</h2>
+      <p className="text-gray-600 mb-6">{error}</p>
+      <Link to="/login"
+        className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all">
+        Go to Login
+      </Link>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => navigate(-1)}
-                className="mr-4 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <FiArrowLeft className="w-5 h-5 text-gray-600" />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pb-16">
+
+      {/* 🔔 Notification */}
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }} className="fixed top-6 right-6 z-50">
+            <div className={`px-5 py-3 rounded-xl shadow-lg flex items-center space-x-2 
+              ${notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`}>
+              <span>{notification.message}</span>
+              <button onClick={() => setNotification({ show: false, message: '', type: '' })}>
+                <FiX className="w-4 h-4" />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
-                {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
-              </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🧭 Header */}
+      <div className="sticky top-0 bg-white/80 backdrop-blur-md shadow-sm border-b z-40">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate(-1)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <FiArrowLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                <FiShoppingCart />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Your Cart</h1>
+                <p className="text-sm text-gray-500">{cartItems.length} items</p>
+              </div>
             </div>
           </div>
+          <p className="text-lg font-bold text-gray-900">{format(total)}</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {cartItems.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-              <FiShoppingCart className="text-gray-400 text-3xl" />
+      {/* 🛒 Main Content */}
+      <div className="max-w-7xl mx-auto px-6 pt-10 grid lg:grid-cols-3 gap-8">
+        {/* Cart Items */}
+        <div className="lg:col-span-2 space-y-6">
+          {cartItems.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <FiShoppingCart className="w-16 h-16 text-gray-400 mb-4" />
+              <h2 className="text-2xl font-semibold text-gray-800 mb-3">Your cart is empty</h2>
+              <p className="text-gray-500 mb-6">Start shopping and add products to your cart.</p>
+              <Link to="/products"
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow hover:from-indigo-700 hover:to-purple-700 transition-all">
+                Shop Now
+              </Link>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Add some products to get started</p>
-            <Link
-              to="/products"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              <FiPackage className="mr-2" />
-              Browse Products
+          ) : (
+            cartItems.map((item) => (
+              <motion.div key={item._id || item.productId?._id}
+                whileHover={{ scale: 1.02 }}
+                className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all p-6 flex flex-col sm:flex-row gap-6">
+                {/* Image */}
+                <div className="w-32 h-32 flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden">
+                  <img src={item.productId?.images?.[0] || '/placeholder.jpg'}
+                    alt={item.productId?.name || "Product"}
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{item.productId?.name || "Unnamed Product"}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{item.productId?.brand || "Brand N/A"}</p>
+                    <div className="flex items-center gap-2 text-yellow-400 mb-2">
+                      {[...Array(5)].map((_, idx) => (
+                        <FiStar key={idx} className={idx < 4 ? "fill-current" : "text-gray-300"} />
+                      ))}
+                      <span className="text-sm text-gray-600">(4.5)</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-indigo-600">{format(item.priceAtTimeOfAdding || 0)}</span>
+                      <span className={`text-xs font-medium px-3 py-1 rounded-full ${item.productId?.quantity > 0
+                        ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {item.productId?.quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => handleUpdateQuantity(item.productId._id, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
+                        className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50">
+                        <FiMinus />
+                      </button>
+                      <span className="px-4 py-1 bg-white border rounded-lg font-medium">{item.quantity}</span>
+                      <button onClick={() => handleUpdateQuantity(item.productId._id, item.quantity + 1)}
+                        disabled={item.quantity >= item.productId?.quantity}
+                        className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50">
+                        <FiPlus />
+                      </button>
+                    </div>
+                    <div className="flex gap-3">
+                      <button onClick={() => addToWishlist(item.productId._id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                        <FiHeart />
+                      </button>
+                      <button onClick={() => handleRemove(item.productId._id)}
+                        className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+
+        {/* 🧾 Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-md sticky top-24 p-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">
+              <FiCreditCard className="text-indigo-600" /> Order Summary
+            </h2>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between text-gray-700">
+                <span>Subtotal</span><span>{format(subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-gray-700">
+                <span>Shipping</span>
+                <span className={shipping === 0 ? "text-green-600 font-semibold" : ""}>
+                  {shipping === 0 ? "Free" : format(shipping)}
+                </span>
+              </div>
+              <div className="border-t border-gray-100 my-3"></div>
+              <div className="flex justify-between font-bold text-lg text-gray-900">
+                <span>Total</span><span className="text-indigo-600">{format(total)}</span>
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full mt-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow hover:shadow-lg transition-all">
+              <FiCreditCard className="inline mr-2" /> Proceed to Checkout
+            </motion.button>
+
+            <Link to="/products"
+              className="block text-center mt-4 text-indigo-600 hover:text-indigo-700 font-medium">
+              Continue Shopping
             </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg shadow-sm border">
-                <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold text-gray-900">Cart Items</h2>
-                </div>
-                <div className="divide-y divide-gray-200">
-                  {cartItems.map((item) => (
-                    <div key={item._id} className="p-6">
-                      <div className="flex items-start space-x-4">
-                        {/* Product Image */}
-                        <div className="flex-shrink-0">
-                          {item.productId.images && item.productId.images[0] ? (
-                            <img
-                              src={item.productId.images[0]}
-                              alt={item.productId.name}
-                              className="w-20 h-20 object-cover rounded-lg"
-                              onError={(e) => {
-                                e.target.src = "/placeholder-product.jpg";
-                              }}
-                            />
-                          ) : (
-                            <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                              <FiPackage className="text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Product Details */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-medium text-gray-900 truncate">
-                                {item.productId.name}
-                              </h3>
-                              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                                {item.productId.description}
-                              </p>
-                              <div className="flex items-center mt-2 space-x-4">
-                                <span className="text-lg font-semibold text-blue-600">
-                                  PKR {item.priceAtTimeOfAdding.toLocaleString()}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  In Stock: {item.productId.quantity}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Quantity Controls */}
-                          <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() =>
-                                  handleUpdateQuantity(
-                                    item.productId._id,
-                                    Math.max(1, item.quantity - 1)
-                                  )
-                                }
-                                disabled={item.quantity <= 1}
-                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                <FiMinus className="w-4 h-4" />
-                              </button>
-                              <span className="w-12 text-center font-medium">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleUpdateQuantity(item.productId._id, item.quantity + 1)
-                                }
-                                disabled={item.quantity >= item.productId.quantity}
-                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                <FiPlus className="w-4 h-4" />
-                              </button>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center space-x-2">
-                              <Link
-                                to={`/product/${item.productId._id}`}
-                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                              >
-                                <FiEye className="mr-1" />
-                                View
-                              </Link>
-                              <button
-                                onClick={() => handleRemoveFromCart(item.productId._id)}
-                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
-                              >
-                                <FiTrash2 className="mr-1" />
-                                Remove
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm border sticky top-8">
-                <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">PKR {calculateSubtotal().toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium text-green-600">Free</span>
-                  </div>
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between text-lg font-semibold">
-                      <span>Total</span>
-                      <span className="text-green-600">PKR {calculateTotal().toLocaleString()}</span>
-                    </div>
-                  </div>
-                  
-                  <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
-                    <FiCreditCard className="mr-2" />
-                    Proceed to Checkout
-                  </button>
-                  
-                  <div className="text-center">
-                    <Link
-                      to="/products"
-                      className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
-                    >
-                      Continue Shopping
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

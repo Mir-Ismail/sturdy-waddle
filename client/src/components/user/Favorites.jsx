@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FiHeart, FiTrash2, FiShoppingCart, FiEye, FiStar, FiPackage } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiHeart, FiTrash2, FiShoppingCart, FiEye, FiStar, FiPackage, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [removing, setRemoving] = useState({});
 
   useEffect(() => {
     fetchFavorites();
@@ -13,483 +17,290 @@ const Favorites = () => {
 
   const fetchFavorites = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/user/favorites', {
+      if (!token) {
+        setError("Please login to view your favorites");
+        return;
+      }
+
+      const response = await axios.get('http://localhost:5000/api/user/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch favorites');
-      }
-
-      const data = await response.json();
-      setFavorites(data);
+      setFavorites(response.data || []);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || "Failed to fetch favorites");
     } finally {
       setLoading(false);
     }
   };
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: '' });
+    }, 3000);
+  };
+
   const removeFromFavorites = async (productId) => {
+    setRemoving(prev => ({ ...prev, [productId]: true }));
+
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/user/favorites/${productId}`, {
-        method: 'DELETE',
+      await axios.delete(`http://localhost:5000/api/user/wishlist/${productId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to remove from favorites');
-      }
-
-      // Remove from local state
-      setFavorites(prev => prev.filter(item => item.product._id !== productId));
+      setFavorites(prev => prev.filter(item => item.productId._id !== productId));
+      showNotification("Removed from favorites!");
     } catch (err) {
-      setError(err.message);
+      showNotification("Failed to remove from favorites", "error");
+    } finally {
+      setRemoving(prev => ({ ...prev, [productId]: false }));
     }
   };
+
+  const addToCart = async (productId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:5000/api/user/cart', {
+        productId,
+        quantity: 1
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      showNotification("Added to cart successfully!");
+    } catch (err) {
+      showNotification("Failed to add to cart", "error");
+    }
+  };
+
+  const formatPrice = (price) => new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(price);
 
   const getRatingStars = (rating = 4.5) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <FiStar
-          key={i}
-          style={{
-            width: "16px",
-            height: "16px",
-            color: "#fbbf24",
-            fill: "currentColor",
-          }}
-        />
-      );
-    }
+    for (let i = 0; i < fullStars; i++)
+      stars.push(<FiStar key={i} className="w-4 h-4 text-yellow-400 fill-current" />);
 
-    if (hasHalfStar) {
-      stars.push(
-        <FiStar
-          key="half"
-          style={{
-            width: "16px",
-            height: "16px",
-            color: "#fbbf24",
-            fill: "currentColor",
-            opacity: 0.7,
-          }}
-        />
-      );
-    }
+    if (hasHalfStar)
+      stars.push(<FiStar key="half" className="w-4 h-4 text-yellow-400 fill-current opacity-70" />);
 
     const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <FiStar
-          key={`empty-${i}`}
-          style={{ width: "16px", height: "16px", color: "#e2e8f0" }}
-        />
-      );
-    }
+    for (let i = 0; i < emptyStars; i++)
+      stars.push(<FiStar key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
 
     return stars;
   };
 
-  // Inline styles
-  const styles = {
-    container: {
-      maxWidth: '1400px',
-      margin: '0 auto',
-      padding: '2rem',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    },
-    header: {
-      marginBottom: '3rem',
-      textAlign: 'center',
-      color: 'white',
-    },
-    title: {
-      fontSize: '3rem',
-      fontWeight: '800',
-      marginBottom: '0.5rem',
-      textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-    },
-    subtitle: {
-      fontSize: '1.2rem',
-      opacity: '0.9',
-      fontWeight: '300',
-    },
-    content: {
-      background: 'white',
-      borderRadius: '20px',
-      padding: '2rem',
-      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-      minHeight: '600px',
-    },
-    loading: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '400px',
-      fontSize: '1.2rem',
-      color: '#64748b',
-    },
-    error: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '400px',
-      fontSize: '1.2rem',
-      color: '#dc2626',
-      background: '#fef2f2',
-      borderRadius: '12px',
-      padding: '2rem',
-    },
-    emptyState: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '400px',
-      textAlign: 'center',
-      color: '#64748b',
-      padding: '4rem 2rem',
-    },
-    emptyIcon: {
-      fontSize: '5rem',
-      marginBottom: '1.5rem',
-      color: '#94a3b8',
-      opacity: '0.5',
-    },
-    emptyTitle: {
-      fontSize: '2rem',
-      fontWeight: '700',
-      marginBottom: '1rem',
-      color: '#374151',
-    },
-    emptyText: {
-      fontSize: '1.1rem',
-      color: '#64748b',
-      maxWidth: '400px',
-      lineHeight: '1.6',
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-      gap: '2rem',
-      marginTop: '2rem',
-    },
-    card: {
-      background: 'white',
-      borderRadius: '16px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-      overflow: 'hidden',
-      transition: 'all 0.3s ease',
-      border: '1px solid #f1f5f9',
-      position: 'relative',
-    },
-    cardHover: {
-      transform: 'translateY(-8px)',
-      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
-    },
-    imageContainer: {
-      position: 'relative',
-      height: '250px',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-    },
-    image: {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      transition: 'transform 0.3s ease',
-    },
-    placeholderImage: {
-      color: '#94a3b8',
-      fontSize: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '0.5rem',
-    },
-    overlay: {
-      position: 'absolute',
-      top: '1rem',
-      right: '1rem',
-      display: 'flex',
-      gap: '0.5rem',
-    },
-    removeButton: {
-      background: 'rgba(239, 68, 68, 0.9)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '50%',
-      width: '2.5rem',
-      height: '2.5rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      backdropFilter: 'blur(10px)',
-    },
-    removeButtonHover: {
-      background: 'rgba(239, 68, 68, 1)',
-      transform: 'scale(1.1)',
-    },
-    details: {
-      padding: '1.5rem',
-    },
-    productName: {
-      margin: '0 0 0.75rem 0',
-      fontSize: '1.25rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      lineHeight: '1.3',
-    },
-    description: {
-      color: '#64748b',
-      marginBottom: '1.5rem',
-      lineHeight: '1.6',
-      fontSize: '0.95rem',
-    },
-    ratingSection: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      marginBottom: '1rem',
-    },
-    stars: {
-      display: 'flex',
-      gap: '2px',
-    },
-    ratingText: {
-      fontSize: '0.9rem',
-      color: '#64748b',
-      fontWeight: '500',
-    },
-    priceSection: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '1.5rem',
-      padding: '1rem',
-      background: '#f8fafc',
-      borderRadius: '12px',
-    },
-    price: {
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      color: '#059669',
-    },
-    stock: {
-      fontSize: '0.9rem',
-      color: '#64748b',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-    },
-    stockIcon: {
-      color: '#059669',
-    },
-    actions: {
-      display: 'flex',
-      gap: '0.75rem',
-    },
-    btnPrimary: {
-      flex: 1,
-      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-      color: 'white',
-      border: 'none',
-      padding: '1rem 1.5rem',
-      borderRadius: '12px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.5rem',
-      fontSize: '0.95rem',
-      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-    },
-    btnPrimaryHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 8px 20px rgba(59, 130, 246, 0.4)',
-    },
-    btnSecondary: {
-      flex: 1,
-      background: 'white',
-      color: '#374151',
-      border: '2px solid #e5e7eb',
-      padding: '1rem 1.5rem',
-      borderRadius: '12px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.5rem',
-      fontSize: '0.95rem',
-      textDecoration: 'none',
-    },
-    btnSecondaryHover: {
-      background: '#f8fafc',
-      borderColor: '#d1d5db',
-      transform: 'translateY(-2px)',
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.6, staggerChildren: 0.1 },
     },
   };
 
-  if (loading) return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        <div style={styles.loading}>Loading your favorites...</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50 flex flex-col items-center justify-center space-y-8">
+        <div className="relative">
+          <div className="w-20 h-20 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-r-red-600 rounded-full animate-spin animate-reverse"></div>
+        </div>
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+            Loading Favorites
+          </h2>
+          <p className="text-gray-600">Fetching your favorite items...</p>
+        </div>
       </div>
-    </div>
-  );
-  
-  if (error) return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        <div style={styles.error}>Error: {error}</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex flex-col items-center justify-center text-center px-6">
+        <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+          <FiHeart className="w-12 h-12 text-red-500" />
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Error Loading Favorites</h2>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <Link
+          to="/login"
+          className="px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all"
+        >
+          Go to Login
+        </Link>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>My Favorites</h1>
-        <p style={styles.subtitle}>Products you've marked as favorites</p>
+    <motion.div
+      className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50 py-12"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      {/* Notification */}
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -100 }}
+            className="fixed top-4 right-4 z-50"
+          >
+            <div className={`px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2 ${notification.type === 'error'
+              ? 'bg-red-500 text-white'
+              : 'bg-green-500 text-white'
+              }`}>
+              <span>{notification.message}</span>
+              <button
+                onClick={() => setNotification({ show: false, message: '', type: '' })}
+              >
+                <FiX className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Page Title */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+          My Favorites
+        </h1>
+        <p className="text-gray-600 mt-2">
+          {favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved
+        </p>
       </div>
-      
-      <div style={styles.content}>
+
+      {/* Favorites Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {favorites.length === 0 ? (
-          <div style={styles.emptyState}>
-            <FiHeart style={styles.emptyIcon} />
-            <h3 style={styles.emptyTitle}>No favorites yet</h3>
-            <p style={styles.emptyText}>
-              Start exploring our products and add your favorites here. 
-              You'll be able to quickly access them whenever you need!
+          <div className="text-center py-16">
+            <div className="w-32 h-32 bg-gradient-to-br from-pink-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-8">
+              <FiHeart className="w-16 h-16 text-pink-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">No favorites yet</h2>
+            <p className="text-gray-600 mb-8 text-lg">
+              Start exploring our products and save your favorites here.
             </p>
-            <Link 
-              to="/products" 
-              style={{
-                ...styles.btnPrimary,
-                marginTop: '2rem',
-                textDecoration: 'none',
-                display: 'inline-flex'
-              }}
+            <Link
+              to="/products"
+              className="inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white font-semibold rounded-xl hover:from-pink-700 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              <FiPackage /> Browse Products
+              <FiPackage className="w-6 h-6" />
+              <span>Start Shopping</span>
             </Link>
           </div>
         ) : (
-          <div style={styles.grid}>
-            {favorites.map((item) => (
-              <div key={item._id} style={styles.card}>
-                <div style={styles.imageContainer}>
-                  {item.product.images && item.product.images[0] ? (
-                    <img 
-                      src={item.product.images[0]} 
-                      alt={item.product.name} 
-                      style={styles.image}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            variants={containerVariants}
+          >
+            {favorites.map((item, index) => (
+              <motion.div
+                key={item._id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                {/* Product Image */}
+                <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                  {item.productId.images?.[0] ? (
+                    <img
+                      src={item.productId.images[0]}
+                      alt={item.productId.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div style={styles.placeholderImage}>
-                      <FiPackage style={{ fontSize: '2rem' }} />
-                      No Image Available
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                      <FiPackage className="w-16 h-16 mb-2" />
+                      <span className="text-sm">No Image Available</span>
                     </div>
                   )}
-                  <div style={styles.overlay}>
-                    <button 
-                      style={styles.removeButton}
-                      onClick={() => removeFromFavorites(item.product._id)}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = 'rgba(239, 68, 68, 1)';
-                        e.target.style.transform = 'scale(1.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = 'rgba(239, 68, 68, 0.9)';
-                        e.target.style.transform = 'scale(1)';
-                      }}
+
+                  {/* Remove Button */}
+                  <div className="absolute top-3 right-3">
+                    <button
+                      onClick={() => removeFromFavorites(item.productId._id)}
+                      disabled={removing[item.productId._id]}
+                      className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-white transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50"
                     >
-                      <FiTrash2 />
+                      {removing[item.productId._id] ? (
+                        <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin"></div>
+                      ) : (
+                        <FiTrash2 className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
-                
-                <div style={styles.details}>
-                  <h3 style={styles.productName}>{item.product.name}</h3>
-                  <p style={styles.description}>
-                    {item.product.description?.substring(0, 120)}...
-                  </p>
-                  
-                  <div style={styles.ratingSection}>
-                    <div style={styles.stars}>{getRatingStars()}</div>
-                    <span style={styles.ratingText}>(4.5)</span>
+
+                {/* Details */}
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    {item.productId.name}
+                  </h3>
+
+                  <div className="flex items-center space-x-2 mb-3">
+                    <div className="flex items-center">{getRatingStars()}</div>
+                    <span className="text-sm text-gray-600">(4.5)</span>
                   </div>
-                  
-                  <div style={styles.priceSection}>
-                    <span style={styles.price}>PKR {item.product.price?.toLocaleString()}</span>
-                    <span style={styles.stock}>
-                      <FiPackage style={styles.stockIcon} />
-                      {item.product.quantity > 0 ? `${item.product.quantity} available` : 'Out of Stock'}
+
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xl font-bold text-green-600">{formatPrice(item.productId.price)}</span>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${item.productId.quantity > 0
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                      }`}>
+                      {item.productId.quantity > 0 ? `${item.productId.quantity} available` : 'Out of stock'}
                     </span>
                   </div>
-                  
-                  <div style={styles.actions}>
-                    <button 
-                      style={styles.btnPrimary}
-                      onMouseEnter={(e) => {
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                      }}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => addToCart(item.productId._id)}
+                      disabled={item.productId.quantity === 0}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center space-x-2"
                     >
-                      <FiShoppingCart /> Add to Cart
+                      <FiShoppingCart className="w-4 h-4" />
+                      <span>Add to Cart</span>
                     </button>
-                    <Link 
-                      to={`/product/${item.product._id}`}
-                      style={styles.btnSecondary}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = '#f8fafc';
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.transform = 'translateY(-2px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = 'white';
-                        e.target.style.borderColor = '#e5e7eb';
-                        e.target.style.transform = 'translateY(0)';
-                      }}
+                    <Link
+                      to={`/product/${item.productId._id}`}
+                      className="flex-none bg-gray-100 text-gray-700 hover:bg-gray-200 py-2.5 px-4 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center"
                     >
-                      <FiEye /> View Details
+                      <FiEye className="w-5 h-5" />
                     </Link>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-export default Favorites; 
+export default Favorites;

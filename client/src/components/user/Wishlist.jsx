@@ -63,7 +63,7 @@ const Wishlist = () => {
   const addToCart = async (productId) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/cart", {
+      const response = await fetch("http://localhost:5000/api/cart", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -162,8 +162,8 @@ const Wishlist = () => {
                     </span>
                     <span
                       className={`text-sm font-medium ${item.productId.quantity > 0
-                          ? "text-green-600"
-                          : "text-red-500"
+                        ? "text-green-600"
+                        : "text-red-500"
                         }`}
                     >
                       {item.productId.quantity > 0
@@ -178,8 +178,8 @@ const Wishlist = () => {
                     onClick={() => addToCart(item.productId._id)}
                     disabled={item.productId.quantity === 0}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${item.productId.quantity === 0
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
                       }`}
                   >
                     <FiShoppingCart /> Add to Cart

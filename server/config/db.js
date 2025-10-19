@@ -15,7 +15,7 @@ const connectDB = async () => {
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
     });
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
 
     // Handle connection events
     mongoose.connection.on("error", (err) => {
@@ -23,13 +23,13 @@ const connectDB = async () => {
     });
 
     mongoose.connection.on("disconnected", () => {
-      console.log("MongoDB disconnected");
+      console.log("⚠️  MongoDB disconnected");
     });
 
     // Close connection on app termination
     process.on("SIGINT", async () => {
       await mongoose.connection.close();
-      console.log("MongoDB connection closed through app termination");
+      console.log("🔌 MongoDB connection closed through app termination");
       process.exit(0);
     });
   } catch (err) {

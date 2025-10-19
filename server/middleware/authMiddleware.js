@@ -3,59 +3,63 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 
 export const protect = async (req, res, next) => {
-  let token;
-  const authHeaders = req.headers.Authorization || req.headers.authorization;
-  
-  // Check for token in headers first (Bearer token)
-  if (authHeaders && authHeaders.startsWith('Bearer')) {
-    token = authHeaders.split(' ')[1];
-  } else if (req.cookies?.token) {
-    // Fallback to cookies if no Bearer token
-    token = req.cookies.token;
-  }
-
-  if (!token) {
-    return res.status(401).json({ 
-      success: false,
-      error: 'Not authorized to access this route - No token provided' 
-    });
-  }
-
   try {
-    // Verify token format first
-    if (typeof token !== 'string' || token.trim() === '') {
-      throw new Error('Invalid token format');
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        error: 'No token provided'
+      });
     }
 
+    // Remove 'Bearer ' prefix if it exists
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : authHeader;
+
+    console.log('Token received:', token ? 'Yes' : 'No');
+
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+    console.log('Decoded token:', decoded);
+
     if (!decoded.id) {
-      throw new Error('Token payload is invalid');
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token payload'
+      });
     }
 
+    // Get user from database
     const user = await User.findById(decoded.id).select('-password');
-    
+
     if (!user) {
-      throw new Error('User not found');
+      return res.status(401).json({
+        success: false,
+        error: 'User not found'
+      });
     }
 
+    console.log('User found:', user._id.toString());
+
+    // Attach user to request
     req.user = user;
     next();
   } catch (err) {
-    console.error('Token verification error:', err.message);
-    
-    let errorMessage = 'Not authorized, token failed';
-    if (err.name === 'JsonWebTokenError') {
-      errorMessage = 'Invalid token format';
-    } else if (err.name === 'TokenExpiredError') {
-      errorMessage = 'Token has expired';
-    } else if (err.name === 'NotBeforeError') {
-      errorMessage = 'Token not active yet';
+    console.error('Auth middleware error:', err.message);
+
+    let errorMessage = 'Authentication failed';
+    if (err.name === 'TokenExpiredError') {
+      errorMessage = 'Token expired';
+    } else if (err.name === 'JsonWebTokenError') {
+      errorMessage = 'Invalid token';
     }
-    
-    return res.status(401).json({ 
+
+    return res.status(401).json({
       success: false,
-      error: errorMessage 
+      error: errorMessage
     });
   }
 };
@@ -64,19 +68,19 @@ export const protect = async (req, res, next) => {
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        error: 'Not authorized to access this route' 
+        error: 'Not authenticated'
       });
     }
-    
+
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: `User role ${req.user.role} is not authorized to access this route` 
+        error: `Access denied for ${req.user.role} role`
       });
     }
-    
+
     next();
   };
 };

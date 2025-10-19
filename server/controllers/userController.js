@@ -266,7 +266,11 @@ export const getWishlist = async (req, res) => {
 export const addToWishlist = async (req, res) => {
   try {
     const { productId } = req.body;
+    console.log('====================================');
+    console.log(productId, "thisis product id ");
+    console.log('====================================');
     const userId = req.user.id;
+    console.log('User ID:', userId);
 
     // Check if product exists
     const product = await Product.findById(productId);

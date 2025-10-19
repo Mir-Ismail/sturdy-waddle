@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import LoadingSpinner from "../components/LoadingSpinner";
 import {
   FiStar,
   FiShoppingCart,
@@ -67,15 +68,7 @@ const TodayDeals = () => {
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
   };
 
-  if (loading) {
-    return (
-      <div className="today-deals-page">
-        <div className="loading-container">
-          <div className="loading-spinner">Loading today's deals...</div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullScreen text="Loading today's deals..." />;
 
   if (error) {
     return (
@@ -207,9 +200,8 @@ const TodayDeals = () => {
 
                       <div className="product-stock">
                         <span
-                          className={`stock-badge ${
-                            product.quantity > 0 ? "in-stock" : "out-of-stock"
-                          }`}
+                          className={`stock-badge ${product.quantity > 0 ? "in-stock" : "out-of-stock"
+                            }`}
                         >
                           {product.quantity > 0 ? "In Stock" : "Out of Stock"}
                         </span>

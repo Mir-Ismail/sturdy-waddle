@@ -11,35 +11,24 @@ import {
   FiChevronDown,
   FiPhone,
   FiTruck,
-  FiPackage,
   FiGrid,
   FiMapPin,
-  FiHeadphones,
-  FiSettings,
-  FiLogOut,
-  FiCreditCard,
-  FiEye,
-  FiShield
+  FiHeadphones
 } from "react-icons/fi";
 import ProfileModal from "./ProfileModal";
+import CartModal from "./CartModal";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [showCategories, setShowCategories] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const onResize = () => setViewportWidth(window.innerWidth);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,19 +38,8 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isMobile = viewportWidth < 768;
-
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-  };
-
-  const toggleCategories = () => {
-    setShowCategories(!showCategories);
-  };
-
-  const getUserID = () => {
-    if (!user) return null;
-    return user._id || null;
   };
 
   // Helper function to check if user has specific role
@@ -137,26 +115,25 @@ const Navbar = () => {
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-white shadow-lg">
-      {/* Top Bar */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-2">
+    <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm">
+      {/* Top Bar (subtle, minimal) */}
+      <div className="hidden md:block bg-white border-b border-gray-100/80 text-gray-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
+          <div className="flex justify-between items-center text-xs py-2">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors">
                 <FiHeadphones className="w-4 h-4" />
-                <span className="hidden sm:inline">24/7 Support: 1-800-234-5678</span>
-                <span className="sm:hidden">24/7 Support</span>
+                <span>Support 24/7</span>
+              </div>
+              <div className="hidden lg:flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors">
+                <FiTruck className="w-4 h-4" />
+                <span>Fast delivery</span>
               </div>
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="hidden md:flex items-center space-x-2">
-                <FiTruck className="w-4 h-4" />
-                <span>Free Shipping Over $99</span>
-              </div>
-              <div className="hidden lg:flex items-center space-x-2">
+            <div className="hidden md:flex items-center gap-4 text-gray-500">
+              <div className="hidden lg:flex items-center gap-2 hover:text-gray-700 transition-colors">
                 <FiMapPin className="w-4 h-4" />
-                <span>Store Locator</span>
+                <span>Locations</span>
               </div>
             </div>
           </div>
@@ -164,56 +141,49 @@ const Navbar = () => {
       </div>
 
       {/* Main Header */}
-      <header className={`transition-all duration-300 ${scrolled ? 'py-2' : 'py-4'} bg-white border-b border-gray-100`}>
+      <header className={`transition-all duration-300 ${scrolled ? 'py-2' : 'py-3'} bg-white`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">M</span>
+            <Link to="/" className="flex items-center space-x-2 flex-shrink-0 group">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <FiGrid className="text-white w-5 h-5" />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-2xl font-bold">
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Market
-                  </span>
-                  <span className="text-gray-800">Match</span>
-                </h1>
-              </div>
+              <span className="text-xl font-bold">
+                Market<span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Match</span>
+              </span>
             </Link>
 
             {/* Search Bar */}
-            <div className="flex-1 max-w-2xl mx-8">
+            <div className="flex-1 max-w-2xl mx-4 md:mx-8">
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <FiSearch className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search for products..."
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-2xl 
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           bg-gray-50 hover:bg-white transition-colors duration-200
+                  className="block w-full pl-12 pr-24 py-2.5 border border-gray-200 rounded-full 
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                           bg-gray-50 hover:bg-white transition-all duration-200
                            text-sm placeholder-gray-500"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
                 <button
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center
-                           text-gray-400 hover:text-blue-600 transition-colors duration-200"
+                  className="absolute inset-y-0 right-2 my-1.5 px-4 flex items-center
+                           bg-gradient-to-r from-blue-600 to-purple-600 text-white
+                           rounded-full text-sm font-medium hover:shadow-lg transition-all"
                   onClick={handleSearch}
                 >
-                  <div className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-lg 
-                                flex items-center justify-center transition-colors duration-200">
-                    <FiSearch className="h-4 w-4 text-white" />
-                  </div>
+                  Search
                 </button>
               </div>
             </div>
 
             {/* User Actions */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-2 md:gap-4">
               {isAuthenticated ? (
                 <>
                   {/* Customer Actions */}
@@ -222,27 +192,26 @@ const Navbar = () => {
                       {/* Wishlist */}
                       <Link
                         to="/wishlist"
-                        className="relative p-2 text-gray-600 hover:text-blue-600 
-                                 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                        className="relative p-2 text-gray-600 hover:text-red-500 rounded-lg transition-colors"
                       >
                         <FiHeart className="w-6 h-6" />
                       </Link>
 
-                      {/* Cart */}
-                      <Link
-                        to="/cart"
-                        className="relative p-2 text-gray-600 hover:text-blue-600 
-                                 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                      {/* Cart - Opens Modal */}
+                      <button
+                        onClick={() => setIsCartOpen(true)}
+                        className="relative p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
                       >
                         <FiShoppingCart className="w-6 h-6" />
                         {cartCount > 0 && (
-                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 
+                          <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 
+                                         bg-gradient-to-r from-blue-600 to-purple-600 
                                          text-white text-xs rounded-full flex items-center 
-                                         justify-center font-medium">
+                                         justify-center font-semibold shadow-lg">
                             {cartCount}
                           </span>
                         )}
-                      </Link>
+                      </button>
                     </>
                   )}
 
@@ -250,12 +219,12 @@ const Navbar = () => {
                   {isVendorOrAdmin() && (
                     <>
                       {/* Notifications */}
-                      <button className="relative p-2 text-gray-600 hover:text-blue-600 
-                                       hover:bg-blue-50 rounded-xl transition-all duration-200">
+                      <button className="relative p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors">
                         <FiBell className="w-6 h-6" />
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 
+                                       bg-gradient-to-r from-blue-600 to-purple-600 
                                        text-white text-xs rounded-full flex items-center 
-                                       justify-center font-medium">
+                                       justify-center font-semibold shadow-lg">
                           3
                         </span>
                       </button>
@@ -263,8 +232,7 @@ const Navbar = () => {
                       {/* Dashboard */}
                       <Link
                         to="/dashboard"
-                        className="relative p-2 text-gray-600 hover:text-blue-600 
-                                 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                        className="relative p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
                       >
                         <FiGrid className="w-6 h-6" />
                       </Link>
@@ -275,17 +243,16 @@ const Navbar = () => {
                   <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
                     <div className="relative">
                       <ProfileModal>
-                        <div className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-xl transition-all duration-200 cursor-pointer">
+                        <div className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
                           {user?.pic ? (
                             <img
                               src={user.pic}
                               alt={user.name}
-                              className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-100"
+                              className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-200"
                             />
                           ) : (
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 
-                                          rounded-full flex items-center justify-center">
-                              <FiUser className="w-4 h-4 text-white" />
+                            <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                              <FiUser className="w-5 h-5 text-white" />
                             </div>
                           )}
                           <div className="hidden lg:block text-left">
@@ -314,9 +281,9 @@ const Navbar = () => {
                   <Link
                     to="/register"
                     className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 
-                             text-white text-sm font-medium rounded-xl 
-                             hover:from-blue-700 hover:to-purple-700 
-                             transition-all duration-200 shadow-lg hover:shadow-xl"
+                             text-white text-sm font-medium rounded-full 
+                             hover:shadow-lg hover:scale-105
+                             transition-all duration-200"
                   >
                     Sign Up
                   </Link>
@@ -325,8 +292,7 @@ const Navbar = () => {
 
               {/* Mobile Menu Toggle */}
               <button
-                className="md:hidden p-2 text-gray-600 hover:text-blue-600 
-                         hover:bg-blue-50 rounded-xl transition-all duration-200"
+                className="md:hidden p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
                 onClick={toggleMenu}
               >
                 {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
@@ -337,7 +303,7 @@ const Navbar = () => {
       </header>
 
       {/* Navigation Bar */}
-      <nav className="bg-white border-b border-gray-100 hidden md:block">
+      <nav className="bg-white border-t border-gray-100 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-8">
@@ -345,8 +311,7 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   className="flex items-center space-x-2 px-4 py-2 text-sm font-medium 
-                           text-gray-700 hover:text-blue-600 hover:bg-blue-50 
-                           rounded-xl transition-all duration-200"
+                           text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                   onMouseEnter={() => setShowCategories(true)}
                   onMouseLeave={() => setShowCategories(false)}
                 >
@@ -358,20 +323,20 @@ const Navbar = () => {
                 {/* Categories Dropdown Menu */}
                 {showCategories && (
                   <div
-                    className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl 
-                             shadow-xl border border-gray-100 z-50 py-2"
+                    className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl 
+                             shadow-xl border border-gray-100 z-50 py-2 animate-fadeIn"
                     onMouseEnter={() => setShowCategories(true)}
                     onMouseLeave={() => setShowCategories(false)}
                   >
                     <Link
                       to="/products"
-                      className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 
-                               hover:text-blue-600 transition-colors duration-200 
-                               border-b border-gray-50"
+                      className="block w-full text-left px-4 py-3 text-sm text-gray-900 font-semibold 
+                               hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 
+                               border-b border-gray-100"
                     >
                       <div className="flex items-center space-x-3">
                         <FiGrid className="w-4 h-4" />
-                        <span className="font-medium">Browse All Products</span>
+                        <span>Browse All Products</span>
                       </div>
                     </Link>
                     {categories.map((category) => (
@@ -379,7 +344,7 @@ const Navbar = () => {
                         key={category}
                         to={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
                         className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 
-                                 hover:text-blue-600 transition-colors duration-200"
+                                 hover:text-blue-600 transition-colors duration-150"
                       >
                         {category}
                       </Link>
@@ -392,41 +357,32 @@ const Navbar = () => {
               <div className="flex items-center space-x-6">
                 <Link
                   to="/new-arrivals"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 
-                           transition-colors duration-200 relative group"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                 >
                   New Arrivals
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 
-                                 group-hover:w-full transition-all duration-200"></span>
                 </Link>
                 <Link
                   to="/todays-deal"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 
-                           transition-colors duration-200 relative group"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                 >
-                  Today's Deals
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 
-                                 group-hover:w-full transition-all duration-200"></span>
+                  Todays Deals
                 </Link>
                 <Link
                   to="/compare"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 
-                           transition-colors duration-200 relative group"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                 >
                   Compare
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 
-                                 group-hover:w-full transition-all duration-200"></span>
                 </Link>
               </div>
             </div>
 
             {/* Right side info */}
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
-              <div className="flex items-center space-x-2">
+            <div className="hidden lg:flex items-center space-x-6 text-sm text-gray-500">
+              <div className="flex items-center space-x-2 hover:text-gray-700 transition-colors">
                 <FiTruck className="w-4 h-4" />
                 <span>Fast Delivery</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 hover:text-gray-700 transition-colors">
                 <FiPhone className="w-4 h-4" />
                 <span>24/7 Support</span>
               </div>
@@ -437,8 +393,8 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
-          <div className="absolute inset-y-0 right-0 w-80 bg-white shadow-xl">
+        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsOpen(false)}>
+          <div className="absolute inset-y-0 right-0 w-80 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
               <button
@@ -450,7 +406,30 @@ const Navbar = () => {
               </button>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+              {/* Mobile Cart Button for Customers */}
+              {isAuthenticated && isCustomer() && (
+                <button
+                  onClick={() => {
+                    setIsCartOpen(true);
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center justify-between w-full py-3 px-4 
+                           bg-gradient-to-r from-blue-600 to-purple-600 text-white 
+                           rounded-xl transition-all duration-200 hover:shadow-lg"
+                >
+                  <span className="flex items-center space-x-3">
+                    <FiShoppingCart className="w-5 h-5" />
+                    <span className="font-medium">View Cart</span>
+                  </span>
+                  {cartCount > 0 && (
+                    <span className="bg-white text-blue-600 px-2.5 py-1 rounded-full text-sm font-semibold">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+              )}
+
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -490,6 +469,12 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Cart Modal */}
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };

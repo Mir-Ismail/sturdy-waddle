@@ -1,11 +1,14 @@
 import express from 'express';
-import { 
-  getVendorProducts, 
-  createProduct, 
-  updateProduct, 
-  deleteProduct, 
+import {
+  getVendorProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
   getSalesAnalytics,
-  getDashboardStats
+  getDashboardStats,
+  getVendorOrders,
+  getVendorOrderById,
+  updateOrderStatus
 } from '../controllers/vendorController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 import Product from '../models/product.js';
@@ -28,27 +31,34 @@ router.get('/dashboard-stats', getDashboardStats);
 
 // Sales analytics
 router.get('/analytics', getSalesAnalytics);
+// Get all orders for the vendor
+router.get('/orders', getVendorOrders);
 
+// Get a single order by ID
+router.get('/orders/:id', getVendorOrderById);
+
+// Update order status (e.g., confirm, ship, cancel)
+router.patch('/orders/:id/status', updateOrderStatus);
 // Test endpoint to create sample orders (for development only)
 router.post('/test/create-sample-orders', async (req, res) => {
   try {
     // Get vendor's products
     const products = await Product.find({ vendor: req.user.id }).limit(3);
-    
+
     if (products.length === 0) {
       return res.status(400).json({ message: 'No products found. Please create some products first.' });
     }
-    
+
     // Create sample orders for the last 30 days
     const sampleOrders = [];
     const now = new Date();
-    
+
     for (let i = 0; i < 10; i++) {
       const randomProduct = products[Math.floor(Math.random() * products.length)];
       const randomDaysAgo = Math.floor(Math.random() * 30);
       const orderDate = new Date(now.getTime() - (randomDaysAgo * 24 * 60 * 60 * 1000));
       const randomQuantity = Math.floor(Math.random() * 5) + 1;
-      
+
       const order = new Order({
         user: req.user.id, // Using vendor as user for testing
         vendor: req.user.id,
@@ -57,21 +67,21 @@ router.post('/test/create-sample-orders', async (req, res) => {
         price: randomProduct.price,
         date: orderDate
       });
-      
+
       sampleOrders.push(order);
     }
-    
+
     await Order.insertMany(sampleOrders);
-    
-    res.json({ 
+
+    res.json({
       message: 'Sample orders created successfully',
       ordersCreated: sampleOrders.length
     });
   } catch (error) {
     console.error('Error creating sample orders:', error);
-    res.status(500).json({ 
-      message: 'Error creating sample orders', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Error creating sample orders',
+      error: error.message
     });
   }
 });

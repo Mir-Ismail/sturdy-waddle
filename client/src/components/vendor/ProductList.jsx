@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { FiEdit, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import ProductEditForm from "./ProductEditForm";
 import "./ProductList.css";
 
 const ProductList = forwardRef(({ onAddProduct }, ref) => {
@@ -198,89 +199,6 @@ const ProductList = forwardRef(({ onAddProduct }, ref) => {
   );
 });
 
-// Product Edit Form Component
-const ProductEditForm = ({ product, onSave, onCancel }) => {
-  const [formData, setFormData] = useState({
-    name: product.name,
-    description: product.description,
-    price: product.price,
-    quantity: product.quantity,
-    category: product.category || "",
-    brand: product.brand || "",
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(product._id, formData);
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="product-edit-form">
-      <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        placeholder="Product name"
-        required
-      />
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        placeholder="Product description"
-        required
-      />
-      <input
-        type="number"
-        name="price"
-        value={formData.price}
-        onChange={handleChange}
-        placeholder="Price in PKR"
-        step="0.01"
-        required
-      />
-      <input
-        type="number"
-        name="quantity"
-        value={formData.quantity}
-        onChange={handleChange}
-        placeholder="Quantity"
-        required
-      />
-      <input
-        type="text"
-        name="category"
-        value={formData.category}
-        onChange={handleChange}
-        placeholder="Category"
-        required
-      />
-      <input
-        type="text"
-        name="brand"
-        value={formData.brand}
-        onChange={handleChange}
-        placeholder="Brand"
-      />
-      <div className="form-actions">
-        <button type="submit" className="btn">
-          Save Changes
-        </button>
-        <button type="button" className="btn-secondary" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
-    </form>
-  );
-};
 
 ProductList.displayName = "ProductList";
 

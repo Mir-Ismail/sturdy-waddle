@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiTrendingUp,
@@ -104,31 +105,7 @@ const Home = () => {
     return categories.sort((a, b) => a.localeCompare(b));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-r-purple-600 rounded-full animate-spin animate-reverse"></div>
-          </div>
-          <div className="text-center space-y-3">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Loading Amazing Products
-            </h2>
-            <p className="text-gray-600 max-w-md">
-              We're fetching the latest products from our vendors. This won't take long!
-            </p>
-            <div className="flex items-center justify-center space-x-2 mt-4">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce delay-100"></div>
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-200"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullScreen text="Loading products..." />;
 
   if (error) {
     return (
@@ -454,7 +431,7 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
         return;
       }
 
-      const response = await axios.post("http://localhost:5000/api/user/cart", {
+      const response = await axios.post("http://localhost:5000/api/cart", {
         productId: product._id,
         quantity: 1
       }, {

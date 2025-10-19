@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import { authApi } from "../utils/api";
 
 const AuthContext = createContext();
 
@@ -20,38 +20,39 @@ export const AuthProvider = ({ children }) => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("token");
       const userInfo = localStorage.getItem("user");
-      
+
       if (token && userInfo) {
         try {
           const parsedUser = JSON.parse(userInfo);
-          
-          // Verify token is still valid by making a request to /api/auth/me
-          const response = await axios.get("http://localhost:5000/api/auth/me", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-          
-          if (response.data.success) {
-            setUser(response.data.user);
-            // Update stored user info with fresh data
-            localStorage.setItem("user", JSON.stringify(response.data.user));
+
+          // First set the user from localStorage for immediate UI update
+          setUser(parsedUser);
+
+          // Then verify token is still valid
+          const response = await authApi.getProfile();
+
+          if (response.success) {
+            setUser(response.user);
+            localStorage.setItem("user", JSON.stringify(response.user));
           } else {
-            // Token is invalid, clear everything
             clearAuthData();
           }
         } catch (error) {
           console.error("Error checking auth status:", error);
-          // Token is invalid or expired, clear everything
-          clearAuthData();
+          // Only clear if it's a 401/403 error, otherwise keep the user logged in
+          if (error.status === 401 || error.status === 403) {
+            clearAuthData();
+          } else {
+            // Network error - keep user logged in with cached data
+            console.log("Network error, using cached user data");
+          }
         }
       }
       setLoading(false);
     };
 
     checkAuthStatus();
-  }, []);
+  }, []); // This only runs once on mount
 
   const clearAuthData = () => {
     setUser(null);
@@ -61,36 +62,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await authApi.login(email, password);
 
-      const userData = response.data;
-      if (userData.success) {
-        setUser(userData.user);
-        localStorage.setItem("user", JSON.stringify(userData.user));
-        localStorage.setItem("token", userData.token);
-        return { success: true, data: userData.user };
+      if (response.success) {
+        setUser(response.user);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("token", response.token);
+        return { success: true, data: response.user };
       } else {
         return {
           success: false,
-          error: userData.error || "Login failed. Please try again.",
+          error: response.error || "Login failed. Please try again.",
         };
       }
     } catch (error) {
+      console.error("Login error:", error);
       return {
         success: false,
-        error:
-          error.response?.data?.error || "Login failed. Please try again.",
+        error: error.response?.error || error.message || "Login failed. Please check your internet connection.",
       };
     }
   };
@@ -101,34 +90,24 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        userData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await authApi.register(userData);
 
-      const newUser = response.data;
-      if (newUser.success) {
-        setUser(newUser.user);
-        localStorage.setItem("user", JSON.stringify(newUser.user));
-        localStorage.setItem("token", newUser.token);
-        return { success: true, data: newUser.user };
+      if (response.success) {
+        setUser(response.user);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("token", response.token);
+        return { success: true, data: response.user };
       } else {
         return {
           success: false,
-          error: newUser.error || "Registration failed. Please try again.",
+          error: response.error || "Registration failed. Please try again.",
         };
       }
     } catch (error) {
+      console.error("Registration error:", error);
       return {
         success: false,
-        error:
-          error.response?.data?.error ||
-          "Registration failed. Please try again.",
+        error: error.response?.error || error.message || "Registration failed. Please check your internet connection.",
       };
     }
   };

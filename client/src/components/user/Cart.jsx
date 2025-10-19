@@ -26,12 +26,18 @@ const Cart = () => {
         setError("Please login to view your cart");
         return;
       }
-      const res = await axios.get("http://localhost:5000/api/user/cart", {
+      const res = await axios.get("http://localhost:5000/api/cart", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // ✅ Ensure it's always an array
-      const data = Array.isArray(res.data) ? res.data : [];
-      setCartItems(data);
+
+      // Extract cart data properly from nested structure
+      const cartData = res.data?.cart || res.data?.data?.cart || res.data;
+      const items = cartData?.items || [];
+
+      console.log("Cart Response:", res.data);
+      console.log("Cart Items:", items);
+
+      setCartItems(items);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Failed to fetch cart");
@@ -50,7 +56,7 @@ const Cart = () => {
     setUpdating(prev => ({ ...prev, [id]: true }));
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/user/cart/${id}`, { quantity: newQty },
+      await axios.put(`http://localhost:5000/api/cart/${id}`, { quantity: newQty },
         { headers: { Authorization: `Bearer ${token}` } });
       setCartItems(prev => prev.map(i =>
         i.productId._id === id ? { ...i, quantity: newQty } : i));
@@ -66,7 +72,7 @@ const Cart = () => {
     setUpdating(prev => ({ ...prev, [id]: true }));
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/user/cart/${id}`, {
+      await axios.delete(`http://localhost:5000/api/cart/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCartItems(prev => prev.filter(i => i.productId._id !== id));
@@ -90,7 +96,11 @@ const Cart = () => {
     }
   };
 
-  const subtotal = cartItems.reduce((sum, i) => sum + (i.priceAtTimeOfAdding || 0) * (i.quantity || 1), 0);
+  const subtotal = cartItems.reduce((sum, item) => {
+    const price = item.product?.price || 0;
+    const quantity = item.quantity || 1;
+    return sum + (price * quantity);
+  }, 0);
   const shipping = subtotal > 100 ? 0 : 10;
   const total = subtotal + shipping;
   const format = (p) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(p);
@@ -177,21 +187,29 @@ const Cart = () => {
             </div>
           ) : (
             cartItems.map((item) => (
-              <motion.div key={item._id || item.productId?._id}
+              <motion.div
+                key={item._id || item.product?._id}
                 whileHover={{ scale: 1.02 }}
                 className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all p-6 flex flex-col sm:flex-row gap-6">
+
                 {/* Image */}
                 <div className="w-32 h-32 flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden">
-                  <img src={item.productId?.images?.[0] || '/placeholder.jpg'}
-                    alt={item.productId?.name || "Product"}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                  <img
+                    src={item.product?.images?.[0] || '/placeholder.jpg'}
+                    alt={item.product?.name || "Product"}
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                  />
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{item.productId?.name || "Unnamed Product"}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{item.productId?.brand || "Brand N/A"}</p>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {item.product?.name || "Unnamed Product"}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-2">
+                      {item.product?.brand || "Brand N/A"}
+                    </p>
                     <div className="flex items-center gap-2 text-yellow-400 mb-2">
                       {[...Array(5)].map((_, idx) => (
                         <FiStar key={idx} className={idx < 4 ? "fill-current" : "text-gray-300"} />
@@ -199,34 +217,44 @@ const Cart = () => {
                       <span className="text-sm text-gray-600">(4.5)</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-indigo-600">{format(item.priceAtTimeOfAdding || 0)}</span>
-                      <span className={`text-xs font-medium px-3 py-1 rounded-full ${item.productId?.quantity > 0
-                        ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {item.productId?.quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                      <span className="text-xl font-bold text-indigo-600">
+                        PKR {(item.product?.price || 0).toLocaleString()}
+                      </span>
+                      <span className={`text-xs font-medium px-3 py-1 rounded-full ${item.product?.quantity > 0
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                        }`}>
+                        {item.product?.quantity > 0 ? 'In Stock' : 'Out of Stock'}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-3">
-                      <button onClick={() => handleUpdateQuantity(item.productId._id, item.quantity - 1)}
+                      <button
+                        onClick={() => handleUpdateQuantity(item.product._id, item.quantity - 1)}
                         disabled={item.quantity <= 1}
                         className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50">
                         <FiMinus />
                       </button>
-                      <span className="px-4 py-1 bg-white border rounded-lg font-medium">{item.quantity}</span>
-                      <button onClick={() => handleUpdateQuantity(item.productId._id, item.quantity + 1)}
-                        disabled={item.quantity >= item.productId?.quantity}
+                      <span className="px-4 py-1 bg-white border rounded-lg font-medium">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => handleUpdateQuantity(item.product._id, item.quantity + 1)}
+                        disabled={item.quantity >= item.product?.quantity}
                         className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-50">
                         <FiPlus />
                       </button>
                     </div>
                     <div className="flex gap-3">
-                      <button onClick={() => addToWishlist(item.productId._id)}
+                      <button
+                        onClick={() => addToWishlist(item.product._id)}
                         className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
                         <FiHeart />
                       </button>
-                      <button onClick={() => handleRemove(item.productId._id)}
+                      <button
+                        onClick={() => handleRemove(item.product._id)}
                         className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
                         <FiTrash2 />
                       </button>
@@ -237,6 +265,8 @@ const Cart = () => {
             ))
           )}
         </div>
+
+      // Replace the Order Summary section in your Cart.jsx with this:
 
         {/* 🧾 Order Summary */}
         <div className="lg:col-span-1">
@@ -261,13 +291,18 @@ const Cart = () => {
               </div>
             </div>
 
+            {/* Checkout Button */}
             <motion.button
+              onClick={() => navigate("/checkout")}
+              disabled={cartItems.length === 0}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full mt-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow hover:shadow-lg transition-all">
-              <FiCreditCard className="inline mr-2" /> Proceed to Checkout
+              className="w-full mt-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <FiCreditCard className="w-5 h-5" />
+              Proceed to Checkout
             </motion.button>
 
+            {/* Continue Shopping Link */}
             <Link to="/products"
               className="block text-center mt-4 text-indigo-600 hover:text-indigo-700 font-medium">
               Continue Shopping

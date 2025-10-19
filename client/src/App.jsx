@@ -1,4 +1,5 @@
 // App.jsx
+import { useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -10,9 +11,10 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Loader from "./components/loader";
+import ResponsiveHeader from "./components/ResponsiveHeader";
+import ResponsiveFooter from "./components/ResponsiveFooter";
+import ResponsiveSidebar from "./components/ResponsiveSidebar";
+import LoadingSpinner from "./components/LoadingSpinner";
 import UserProfile from "./pages/UserProfile";
 import ProductDetails from "./components/ProductDetails";
 import CategoryPage from "./pages/CategoryPage";
@@ -21,25 +23,46 @@ import TodayDeals from "./pages/TodayDeals";
 import CustomerProducts from "./pages/CustomerProducts";
 import NotFound from "./components/NotFound";
 import Favorites from "./components/user/Favorites";
-import OrderHistory from "./components/user/OrderHistory";
 import Cart from "./components/user/Cart";
 import Wishlist from "./components/user/Wishlist";
-import Wallet from "./components/user/Wallet";
 import "./Styles/App.css";
+import "./components/MainContent.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ToastProvider } from "./context/ToastContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Compare from './components/Compare';
+import Checkout from "./pages/Checkout";
+import UserOrderHistory from "./pages/userOrders";
+import Navbar from "./components/Navbar";
 
+// eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { loading } = useAuth();
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const showNavbar = !location.pathname.startsWith("/dashboard");
+
+  if (loading) {
+    return <LoadingSpinner fullScreen text="Loading..." />;
+  }
 
   return (
     <>
-      {showNavbar && <Navbar />}
-      {children}
-      {showNavbar && <Footer />}
+      {showNavbar && (
+        <>
+          <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
+          <ResponsiveSidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+          />
+        </>
+      )}
+      <main className="main-content">
+        {children}
+      </main>
+      {showNavbar && <ResponsiveFooter />}
     </>
   );
 };
@@ -47,9 +70,9 @@ const Layout = ({ children }) => {
 // Helper function to get redirect path based on user role
 const getRedirectPath = (user) => {
   if (!user) return "/";
-  
+
   const userRole = user.role;
-  
+
   if (userRole === "buyer" || !userRole) {
     // Buyers go to home page
     return "/";
@@ -65,7 +88,7 @@ const getRedirectPath = (user) => {
 const AppRoutes = () => {
   const { isAuthenticated, user, loading } = useAuth();
 
-  if (loading) return <Loader />;
+  if (loading) return <LoadingSpinner fullScreen text="Loading..." />;
 
   return (
     <Routes>
@@ -106,8 +129,8 @@ const AppRoutes = () => {
         element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
       />
       <Route path="/userprofile" element={<UserProfile />} />
-      <Route 
-        path="/edit-profile/:id" 
+      <Route
+        path="/edit-profile/:id"
         element={
           isAuthenticated ? (
             <Layout>
@@ -116,7 +139,7 @@ const AppRoutes = () => {
           ) : (
             <Navigate to="/login" />
           )
-        } 
+        }
       />
 
       {/* User-specific Routes */}
@@ -125,14 +148,6 @@ const AppRoutes = () => {
         element={
           <Layout>
             <Favorites />
-          </Layout>
-        }
-      />
-      <Route
-        path="/order-history"
-        element={
-          <Layout>
-            <OrderHistory />
           </Layout>
         }
       />
@@ -152,19 +167,20 @@ const AppRoutes = () => {
           </Layout>
         }
       />
-      <Route
-        path="/wallet"
-        element={
-          <Layout>
-            <Wallet />
-          </Layout>
-        }
-      />
+
       <Route
         path="/compare"
         element={
           <Layout>
             <Compare />
+          </Layout>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <Layout>
+            <UserOrderHistory />
           </Layout>
         }
       />
@@ -179,6 +195,18 @@ const AppRoutes = () => {
         }
       />
 
+      <Route
+        path="/checkout"
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Checkout />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
       {/* Customer Products Route */}
       <Route
         path="/products"
@@ -229,13 +257,19 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <AuthProvider>
-    <CartProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </CartProvider>
-  </AuthProvider>
+  <ErrorBoundary>
+    <AuthProvider>
+      <CartProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ToastProvider>
+      </CartProvider>
+    </AuthProvider>
+  </ErrorBoundary>
 );
+
+// Layout component expects children prop
 
 export default App;

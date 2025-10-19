@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { FiStar, FiShoppingCart, FiHeart, FiClock } from "react-icons/fi";
 
 const NewArrivals = () => {
@@ -32,15 +33,7 @@ const NewArrivals = () => {
     fetchNewArrivals();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-lg font-medium text-gray-600 animate-pulse">
-          Loading new arrivals...
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullScreen text="Loading new arrivals..." />;
 
   if (error) {
     return (
@@ -156,8 +149,8 @@ const NewArrivals = () => {
                   <div className="mt-2">
                     <span
                       className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${product.quantity > 0
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-600"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
                         }`}
                     >
                       {product.quantity > 0 ? "In Stock" : "Out of Stock"}

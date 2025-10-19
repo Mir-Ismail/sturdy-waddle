@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import LoadingSpinner from "../components/LoadingSpinner";
 import {
   FiFilter,
   FiGrid,
@@ -98,15 +99,7 @@ const CategoryPage = () => {
     sortBy
   );
 
-  if (loading) {
-    return (
-      <div className="category-page">
-        <div className="loading-container">
-          <div className="loading-spinner">Loading products...</div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullScreen text="Loading products..." />;
 
   if (error) {
     return (
@@ -273,9 +266,8 @@ const CategoryPage = () => {
 
                       <div className="product-stock">
                         <span
-                          className={`stock-badge ${
-                            product.quantity > 0 ? "in-stock" : "out-of-stock"
-                          }`}
+                          className={`stock-badge ${product.quantity > 0 ? "in-stock" : "out-of-stock"
+                            }`}
                         >
                           {product.quantity > 0 ? "In Stock" : "Out of Stock"}
                         </span>

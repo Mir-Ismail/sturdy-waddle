@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
+import { cartApi, productApi } from "../utils/api";
 import {
   FiStar,
   FiShoppingCart,
@@ -24,22 +29,22 @@ const CustomerProducts = () => {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showFilters, setShowFilters] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(null);
 
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const { fetchCartCount } = useCart();
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch("http://localhost:5000/api/products");
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch products: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const productsData = data.products || data || [];
+        // Use the centralized API utility
+        const response = await productApi.getAllProducts();
+        const productsData = response.products || response || [];
         setProducts(Array.isArray(productsData) ? productsData : []);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -140,16 +145,36 @@ const CustomerProducts = () => {
     setSortBy("newest");
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6 mx-auto" />
-          <p className="text-gray-700 font-semibold text-lg">Loading products...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleAddToCart = async (productId) => {
+    console.log('Adding to cart, productId:', productId);
+    console.log('Is authenticated:', isAuthenticated);
+
+    if (!isAuthenticated) {
+      showError('Please log in to add items to your cart');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+      return;
+    }
+
+    setAddingToCart(productId);
+    try {
+      console.log('Calling cartApi.addToCart...');
+      const response = await cartApi.addToCart(productId, 1);
+      console.log('Cart API response:', response);
+
+      await fetchCartCount();
+      showSuccess('Product added to cart successfully!');
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+      console.error('Error details:', error.response);
+      showError(error.message || 'Failed to add product to cart');
+    } finally {
+      setAddingToCart(null);
+    }
+  };
+
+  if (loading) return <LoadingSpinner fullScreen text="Loading products..." />;
 
   if (error) {
     return (
@@ -183,7 +208,7 @@ const CustomerProducts = () => {
               </h1>
               <p className="text-gray-600">
                 {q ? (
-                  <>Showing results for <span className="font-semibold text-blue-600">"{q}"</span></>
+                  <>Showing results for <span className="font-semibold text-blue-600">&ldquo;{q}&rdquo;</span></>
                 ) : (
                   'Discover amazing products from our trusted vendors'
                 )}
@@ -231,8 +256,8 @@ const CustomerProducts = () => {
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${viewMode === "grid"
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   <FiGrid className="w-5 h-5" />
@@ -240,8 +265,8 @@ const CustomerProducts = () => {
                 <button
                   onClick={() => setViewMode("list")}
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${viewMode === "list"
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   <FiList className="w-5 h-5" />
@@ -340,8 +365,8 @@ const CustomerProducts = () => {
           </div>
         ) : (
           <div className={`grid gap-6 ${viewMode === "grid"
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              : "grid-cols-1"
+            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            : "grid-cols-1"
             }`}>
             {filteredAndSortedProducts.map((product, index) => (
               <motion.div
@@ -438,8 +463,8 @@ const CustomerProducts = () => {
                   {/* Stock Status */}
                   <div className="mb-4">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg ${product.quantity > 0
-                        ? "bg-green-100 text-green-700 border border-green-200"
-                        : "bg-red-100 text-red-700 border border-red-200"
+                      ? "bg-green-100 text-green-700 border border-green-200"
+                      : "bg-red-100 text-red-700 border border-red-200"
                       }`}>
                       {product.quantity > 0 ? (
                         <>
@@ -458,14 +483,21 @@ const CustomerProducts = () => {
                   {/* Actions */}
                   <div className="flex gap-3 mt-auto">
                     <button
-                      disabled={product.quantity === 0}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${product.quantity === 0
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                      onClick={() => handleAddToCart(product._id)}
+                      disabled={product.quantity === 0 || addingToCart === product._id}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${product.quantity === 0 || addingToCart === product._id
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
                         }`}
                     >
                       <FiShoppingCart className="w-4 h-4" />
-                      {product.quantity === 0 ? "Out of Stock" : "Add to Cart"}
+                      {addingToCart === product._id ? (
+                        "Adding..."
+                      ) : product.quantity === 0 ? (
+                        "Out of Stock"
+                      ) : (
+                        "Add to Cart"
+                      )}
                     </button>
                     <button className="w-12 h-12 flex items-center justify-center bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:border-red-400 hover:text-red-600 hover:bg-red-50 transition-all shadow-md">
                       <FiHeart className="w-5 h-5" />

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import LoadingSpinner from '../LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiHeart, FiTrash2, FiShoppingCart, FiEye, FiStar, FiPackage, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
@@ -60,7 +61,7 @@ const Favorites = () => {
 
       setFavorites(prev => prev.filter(item => item.productId._id !== productId));
       showNotification("Removed from favorites!");
-    } catch (err) {
+    } catch (error) {
       showNotification("Failed to remove from favorites", "error");
     } finally {
       setRemoving(prev => ({ ...prev, [productId]: false }));
@@ -70,7 +71,7 @@ const Favorites = () => {
   const addToCart = async (productId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/user/cart', {
+      await axios.post('http://localhost:5000/api/cart', {
         productId,
         quantity: 1
       }, {
@@ -81,7 +82,7 @@ const Favorites = () => {
       });
 
       showNotification("Added to cart successfully!");
-    } catch (err) {
+    } catch (error) {
       showNotification("Failed to add to cart", "error");
     }
   };
@@ -117,22 +118,7 @@ const Favorites = () => {
     },
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50 flex flex-col items-center justify-center space-y-8">
-        <div className="relative">
-          <div className="w-20 h-20 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-r-red-600 rounded-full animate-spin animate-reverse"></div>
-        </div>
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
-            Loading Favorites
-          </h2>
-          <p className="text-gray-600">Fetching your favorite items...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullScreen text="Loading favorites..." />;
 
   if (error) {
     return (

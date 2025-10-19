@@ -7,7 +7,10 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Username is required"],
     unique: true,
     trim: true,
+    lowercase: true,
     minlength: [3, "Username must be at least 3 characters"],
+    maxlength: [30, "Username cannot exceed 30 characters"],
+    match: [/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"],
   },
   email: {
     type: String,
@@ -16,6 +19,7 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
     match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
+    index: true, // Add index for faster email lookups
   },
   password: {
     type: String,
@@ -23,20 +27,82 @@ const UserSchema = new mongoose.Schema({
     minlength: [6, "Password must be at least 6 characters"],
     select: false,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
   role: {
     type: String,
     required: true,
     enum: ["admin", "buyer", "vendor"],
+    default: "buyer",
   },
   status: {
     type: String,
-    enum: ["active", "suspended"],
+    enum: ["active", "suspended", "pending"],
     default: "active",
   },
+  lastLogin: {
+    type: Date,
+    default: null,
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  profile: {
+    firstName: {
+      type: String,
+      trim: true,
+      maxlength: [50, "First name cannot exceed 50 characters"],
+    },
+    lastName: {
+      type: String,
+      trim: true,
+      maxlength: [50, "Last name cannot exceed 50 characters"],
+    },
+    phone: {
+      type: String,
+      trim: true,
+      match: [/^[\+]?[1-9][\d]{0,15}$/, "Please provide a valid phone number"],
+    },
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      zipCode: String,
+      country: {
+        type: String,
+        default: "Pakistan",
+      },
+    },
+  },
+  preferences: {
+    notifications: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      push: { type: Boolean, default: true },
+    },
+    currency: {
+      type: String,
+      default: "PKR",
+      enum: ["PKR", "USD", "EUR"],
+    },
+    language: {
+      type: String,
+      default: "en",
+      enum: ["en", "ur"],
+    },
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    index: true, // Add index for sorting
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+}, {
+  timestamps: true, // This will automatically manage createdAt and updatedAt
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Hash password before saving

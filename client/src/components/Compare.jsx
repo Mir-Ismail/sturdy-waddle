@@ -134,7 +134,7 @@ const Compare = () => {
       }
 
       await axios.post(
-        'http://localhost:5000/api/user/cart',
+        'http://localhost:5000/api/cart',
         { productId, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -234,8 +234,8 @@ const Compare = () => {
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${selectedCategory === cat
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
                     {cat === 'all' ? 'All Categories' : cat}
@@ -452,10 +452,10 @@ const Compare = () => {
                       <td key={product._id} className="p-6 text-center">
                         <span
                           className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${product.quantity > 20
-                              ? 'bg-green-100 text-green-700 border border-green-200'
-                              : product.quantity > 0
-                                ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
-                                : 'bg-red-100 text-red-700 border border-red-200'
+                            ? 'bg-green-100 text-green-700 border border-green-200'
+                            : product.quantity > 0
+                              ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                              : 'bg-red-100 text-red-700 border border-red-200'
                             }`}
                         >
                           {product.quantity > 0 ? (
@@ -500,8 +500,8 @@ const Compare = () => {
                             onClick={() => handleAddToCart(product._id)}
                             disabled={product.quantity === 0}
                             className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-all duration-200 shadow-md ${product.quantity === 0
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5'
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5'
                               }`}
                           >
                             <FiShoppingCart className="w-5 h-5" />

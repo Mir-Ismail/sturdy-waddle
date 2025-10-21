@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../Styles/style.css";
-import { FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -30,7 +30,7 @@ const Register = () => {
         setError(result.error);
       }
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      setError("Registration failed. Please try again.", err);
     } finally {
       setIsLoading(false);
     }

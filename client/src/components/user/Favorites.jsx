@@ -62,7 +62,7 @@ const Favorites = () => {
       setFavorites(prev => prev.filter(item => item.productId._id !== productId));
       showNotification("Removed from favorites!");
     } catch (error) {
-      showNotification("Failed to remove from favorites", "error");
+      showNotification("Failed to remove from favorites", error);
     } finally {
       setRemoving(prev => ({ ...prev, [productId]: false }));
     }
@@ -83,7 +83,7 @@ const Favorites = () => {
 
       showNotification("Added to cart successfully!");
     } catch (error) {
-      showNotification("Failed to add to cart", "error");
+      showNotification("Failed to add to cart", error);
     }
   };
 

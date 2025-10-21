@@ -1,20 +1,19 @@
-import React, {
+import {
   useState,
   useEffect,
   forwardRef,
   useImperativeHandle,
 } from "react";
 import { FiEdit, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import ProductEditForm from "./ProductEditForm";
 import "./ProductList.css";
+import PropTypes from "prop-types";
 
 const ProductList = forwardRef(({ onAddProduct }, ref) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
-  const navigate = useNavigate();
 
   const fetchProducts = async () => {
     try {
@@ -199,6 +198,9 @@ const ProductList = forwardRef(({ onAddProduct }, ref) => {
   );
 });
 
+ProductList.propTypes = {
+  onAddProduct: PropTypes.func,
+};
 
 ProductList.displayName = "ProductList";
 

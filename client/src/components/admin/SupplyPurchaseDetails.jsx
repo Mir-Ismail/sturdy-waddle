@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FiShoppingCart, FiPackage, FiUsers, FiDollarSign, FiCalendar } from 'react-icons/fi';
 
 const SupplyPurchaseDetails = () => {
@@ -256,7 +256,7 @@ const SupplyPurchaseDetails = () => {
                       return acc;
                     }, {})
                   )
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .slice(0, 3)
                     .map(([name, quantity]) => (
                       <li key={name}>
@@ -283,7 +283,7 @@ const SupplyPurchaseDetails = () => {
                       return acc;
                     }, {})
                   )
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .slice(0, 3)
                     .map(([name, revenue]) => (
                       <li key={name}>

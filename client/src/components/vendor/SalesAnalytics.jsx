@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import PropTypes from "prop-types";
 import {
   FiTrendingUp,
   FiDollarSign,
@@ -6,23 +7,22 @@ import {
   FiPackage,
 } from "react-icons/fi";
 import "./SalesAnalytics.css";
-
-const SalesAnalytics = React.forwardRef((props, ref) => {
-  const [analytics, setAnalytics] = useState(null);
+const SalesAnalytics = forwardRef((props, ref) => {
+  const [analytics, setAnalytics] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [period, setPeriod] = useState("month");
 
   useEffect(() => {
     fetchAnalytics();
-  }, [period]);
+  }, [fetchAnalytics]);
 
   // Expose refresh function for parent component
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     refresh: fetchAnalytics,
   }));
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -57,7 +57,7 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-PK", {
@@ -188,9 +188,9 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
                     <td>
                       {analytics.totalSales > 0
                         ? `${(
-                            (product.revenue / analytics.totalSales) *
-                            100
-                          ).toFixed(1)}%`
+                          (product.revenue / analytics.totalSales) *
+                          100
+                        ).toFixed(1)}%`
                         : "0%"}
                     </td>
                   </tr>
@@ -224,8 +224,8 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
             <p>
               {analytics.productSales.length > 0
                 ? analytics.productSales.reduce((best, current) =>
-                    current.revenue > best.revenue ? current : best
-                  ).name
+                  current.revenue > best.revenue ? current : best
+                ).name
                 : "No data available"}
             </p>
           </div>
@@ -234,9 +234,8 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
             <h4>Sales Efficiency</h4>
             <p>
               {analytics.totalOrders > 0
-                ? `${
-                    analytics.totalItems / analytics.totalOrders
-                  } items per order`
+                ? `${analytics.totalItems / analytics.totalOrders
+                } items per order`
                 : "No orders yet"}
             </p>
           </div>
@@ -361,5 +360,11 @@ const TrendChart = ({ data }) => {
     </svg>
   );
 };
+
+TrendChart.propTypes = {
+  data: PropTypes.array.isRequired,
+};
+
+SalesAnalytics.displayName = 'SalesAnalytics';
 
 export default SalesAnalytics;

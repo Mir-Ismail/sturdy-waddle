@@ -1,8 +1,8 @@
 'use client';
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  FiTrash2, FiShoppingCart, FiEye, FiMinus, FiPlus, FiArrowLeft,
+  FiTrash2, FiShoppingCart, FiMinus, FiPlus, FiArrowLeft,
   FiCreditCard, FiHeart, FiStar, FiX, FiAlertCircle
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updating, setUpdating] = useState({});
+  const [setUpdating] = useState({});
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const navigate = useNavigate();
 
@@ -265,10 +265,6 @@ const Cart = () => {
             ))
           )}
         </div>
-
-      // Replace the Order Summary section in your Cart.jsx with this:
-
-        {/* 🧾 Order Summary */}
         <div className="lg:col-span-1">
           <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-md sticky top-24 p-6">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">

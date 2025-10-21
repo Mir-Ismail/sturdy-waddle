@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 import { FiPackage, FiPlus, FiArrowRight, FiSearch, FiRefreshCw } from "react-icons/fi";
 
 const EmptyState = ({
@@ -221,7 +222,7 @@ const EmptyState = ({
                 <FiSearch className="w-6 h-6 text-white" />
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Easy Discovery</h4>
-              <p className="text-sm text-gray-600">Find exactly what you're looking for</p>
+              <p className="text-sm text-gray-600">Find exactly what you&apos;re looking for</p>
             </div>
 
             <div className="text-center p-4 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30">
@@ -243,6 +244,23 @@ const EmptyState = ({
       </div>
     </motion.div>
   );
+};
+
+EmptyState.propTypes = {
+  icon: PropTypes.string,
+  title: PropTypes.string,
+  message: PropTypes.string,
+  showAddButton: PropTypes.bool,
+  showButton: PropTypes.bool,
+  buttonText: PropTypes.string,
+  buttonLink: PropTypes.string,
+  showSearchButton: PropTypes.bool,
+  searchButtonText: PropTypes.string,
+  searchButtonLink: PropTypes.string,
+  showRefreshButton: PropTypes.bool,
+  onRefresh: PropTypes.func,
+  size: PropTypes.oneOf(['sm', 'default', 'lg']),
+  variant: PropTypes.oneOf(['default', 'search', 'error', 'success']),
 };
 
 export default EmptyState;

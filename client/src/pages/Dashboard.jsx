@@ -1,12 +1,11 @@
 // Dashboard.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../Styles/dashboard.css";
 import { useAuth } from "../context/AuthContext";
 import OrderHistory from "../components/user/OrderHistory";
 import Favorites from "../components/user/Favorites";
 import UserProfile from "./UserProfile";
 import VendorDashboard from "../components/vendor/VendorDashboard";
-import SalesAnalytics from "../components/vendor/SalesAnalytics";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import UserList from "../components/admin/UserList";
 import VendorList from "../components/admin/VendorList";
@@ -30,7 +29,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        
+
         const response = await fetch("http://localhost:5000/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,7 +107,7 @@ const Dashboard = () => {
       <div className="dashboard-container">
         <div className="auth-error">
           <h2>Access Denied</h2>
-          <p>Buyers don't have access to the dashboard.</p>
+          <p>Buyers don&apos;t have access to the dashboard.</p>
           <button onClick={() => window.location.href = "/"}>
             Go to Home
           </button>
@@ -125,7 +124,7 @@ const Dashboard = () => {
       profile: <UserProfile user={userDetails || user} onLogout={logout} />,
     },
     admin: {
-      "admin-dashboard": <AdminDashboardStats />,
+      "admin-dashboard": <AdminDashboard />,
       "user-management": <UserList />,
       "vendor-management": <VendorList />,
       "supply-purchase": <SupplyPurchaseDetails />,

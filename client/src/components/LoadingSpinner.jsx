@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import './LoadingSpinner.css';
 
 const LoadingSpinner = ({
@@ -22,6 +22,14 @@ const LoadingSpinner = ({
             </div>
         </div>
     );
+};
+
+LoadingSpinner.propTypes = {
+    size: PropTypes.string,
+    color: PropTypes.string,
+    text: PropTypes.string,
+    overlay: PropTypes.bool,
+    fullScreen: PropTypes.bool,
 };
 
 export default LoadingSpinner;

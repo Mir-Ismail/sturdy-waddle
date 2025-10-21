@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -23,7 +23,7 @@ import axios from "axios";
 const ProductDetails = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
@@ -63,7 +63,9 @@ const ProductDetails = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setIsWishlisted(res.data.isWishlisted);
-      } catch {}
+      } catch (error) {
+        console.error('Error checking wishlist:', error);
+      }
     };
     checkWishlist();
   }, [isAuthenticated, productId]);
@@ -153,9 +155,9 @@ const ProductDetails = () => {
   const discount =
     product.originalPrice && product.originalPrice > product.price
       ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) *
-            100
-        )
+        ((product.originalPrice - product.price) / product.originalPrice) *
+        100
+      )
       : 0;
 
   return (
@@ -199,11 +201,10 @@ const ProductDetails = () => {
                     <button
                       key={i}
                       onClick={() => setSelectedImage(i)}
-                      className={`aspect-square rounded-xl overflow-hidden border-3 transition-all hover:scale-105 ${
-                        selectedImage === i
-                          ? "border-blue-600 ring-2 ring-blue-600/20 scale-105"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      className={`aspect-square rounded-xl overflow-hidden border-3 transition-all hover:scale-105 ${selectedImage === i
+                        ? "border-blue-600 ring-2 ring-blue-600/20 scale-105"
+                        : "border-gray-200 hover:border-gray-300"
+                        }`}
                     >
                       <img
                         src={img}
@@ -274,13 +275,12 @@ const ProductDetails = () => {
               {/* Stock Status */}
               <div className="mb-6">
                 <span
-                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${
-                    product.quantity > 20
-                      ? "bg-green-100 text-green-700 border border-green-200"
-                      : product.quantity > 0
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${product.quantity > 20
+                    ? "bg-green-100 text-green-700 border border-green-200"
+                    : product.quantity > 0
                       ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
                       : "bg-red-100 text-red-700 border border-red-200"
-                  }`}
+                    }`}
                 >
                   {product.quantity > 0 ? (
                     <>
@@ -334,11 +334,10 @@ const ProductDetails = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={isAddingToCart || product.quantity <= 0}
-                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${
-                    product.quantity <= 0
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
-                  }`}
+                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${product.quantity <= 0
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                    }`}
                 >
                   <FiShoppingCart className="w-5 h-5" />
                   {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
@@ -348,11 +347,10 @@ const ProductDetails = () => {
                   <button
                     onClick={handleWishlist}
                     disabled={isAddingToWishlist}
-                    className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-md border-2 ${
-                      isWishlisted
-                        ? "bg-red-600 border-red-700 text-white hover:bg-red-700"
-                        : "bg-white border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
-                    }`}
+                    className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-md border-2 ${isWishlisted
+                      ? "bg-red-600 border-red-700 text-white hover:bg-red-700"
+                      : "bg-white border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
+                      }`}
                   >
                     <FiHeart
                       className={`w-5 h-5 ${isWishlisted ? "fill-white" : ""}`}

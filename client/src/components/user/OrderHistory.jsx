@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FiPackage, FiCalendar, FiDollarSign } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { FiPackage, FiCalendar, } from 'react-icons/fi';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -246,7 +246,7 @@ const OrderHistory = () => {
         <h1 style={styles.title}>Order History</h1>
         <p style={styles.subtitle}>Your past orders and purchases</p>
       </div>
-      
+
       {orders.length === 0 ? (
         <div style={styles.emptyState}>
           <FiPackage style={styles.emptyIcon} />
@@ -271,20 +271,20 @@ const OrderHistory = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div style={styles.orderDetails}>
                 <div style={styles.productImage}>
                   {order.product?.images && order.product.images[0] ? (
-                    <img 
-                      src={order.product.images[0]} 
-                      alt={order.product.name} 
+                    <img
+                      src={order.product.images[0]}
+                      alt={order.product.name}
                       style={styles.productImageImg}
                     />
                   ) : (
                     <div style={styles.placeholderImage}>No Image</div>
                   )}
                 </div>
-                
+
                 <div style={styles.orderSummary}>
                   <p style={styles.quantity}>Quantity: {order.quantity}</p>
                   <p style={styles.price}>
@@ -295,9 +295,9 @@ const OrderHistory = () => {
                   </p>
                 </div>
               </div>
-              
+
               <div style={styles.orderActions}>
-                <button 
+                <button
                   style={styles.btnSecondary}
                   onMouseEnter={(e) => {
                     e.target.style.background = '#e5e7eb';
@@ -308,7 +308,7 @@ const OrderHistory = () => {
                 >
                   Reorder
                 </button>
-                <button 
+                <button
                   style={styles.btnPrimary}
                   onMouseEnter={(e) => {
                     e.target.style.background = '#2563eb';

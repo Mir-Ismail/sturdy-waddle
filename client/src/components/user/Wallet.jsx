@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 
 const Wallet = () => {
@@ -8,7 +8,7 @@ const Wallet = () => {
     transactions: []
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const error = null;
 
   useEffect(() => {
     // For now, we'll use mock data since wallet functionality isn't implemented yet

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { cartApi } from '../utils/api';
@@ -21,7 +22,7 @@ const CartModal = ({ isOpen, onClose }) => {
     const [error, setError] = useState(null);
 
     const { isAuthenticated } = useAuth();
-    const { cartCount, fetchCartCount } = useCart();
+    const { fetchCartCount } = useCart();
 
     useEffect(() => {
         if (isOpen && isAuthenticated) {
@@ -281,6 +282,11 @@ const CartModal = ({ isOpen, onClose }) => {
             </div>
         </div>
     );
+};
+
+CartModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
 };
 
 export default CartModal;

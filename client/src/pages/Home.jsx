@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -13,7 +14,6 @@ import {
   FiRefreshCw,
   FiChevronRight,
   FiHeart,
-  FiPlus,
   FiBarChart2
 } from "react-icons/fi";
 import HeroSection from "../components/sections/heroSection";
@@ -25,7 +25,6 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -118,7 +117,7 @@ const Home = () => {
             <h2 className="text-3xl font-bold text-gray-900">Oops! Something went wrong</h2>
             <p className="text-gray-600 text-lg">{error}</p>
             <p className="text-sm text-gray-500">
-              Don't worry, our team has been notified and we're working to fix this issue.
+              Don&apos;t worry, our team has been notified and we&apos;re working to fix this issue.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -249,7 +248,7 @@ const Home = () => {
 
         {/* Category Sections - Using your original ProductSection component */}
         <div className="chking">
-          {categories.slice(0, 6).map((category, index) => (
+          {categories.slice(0, 6).map((category) => (
             <ProductSection
               key={category}
               title={category}
@@ -281,7 +280,7 @@ const Home = () => {
           <section className="py-12">
             <EmptyState
               title="No Products Available Yet"
-              message="We're working hard to bring you amazing products. Our vendors are setting up their stores!"
+              message="We&apos;re working hard to bring you amazing products. Our vendors are setting up their stores!"
               icon="🏪"
               showButton={false}
               size="default"
@@ -633,6 +632,29 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
       </div>
     </Link>
   );
+};
+
+// PropTypes validation
+CleanProductSection.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string.isRequired,
+  products: PropTypes.array.isRequired,
+  showViewAll: PropTypes.bool.isRequired,
+  viewAllLink: PropTypes.string.isRequired,
+  icon: PropTypes.element.isRequired,
+};
+
+ProminentProductSection.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string.isRequired,
+  products: PropTypes.array.isRequired,
+  bgColor: PropTypes.string.isRequired,
+  viewAllLink: PropTypes.string.isRequired,
+};
+
+EnhancedProductCard.propTypes = {
+  product: PropTypes.object.isRequired,
+  isDark: PropTypes.bool,
 };
 
 export default Home;

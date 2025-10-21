@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
@@ -16,7 +17,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const { isAuthenticated } = useAuth();
 
-  const fetchCartCount = async () => {
+  const fetchCartCount = useCallback(async () => {
     if (!isAuthenticated) {
       setCartCount(0);
       setCartItems([]);
@@ -52,7 +53,7 @@ export const CartProvider = ({ children }) => {
       setCartCount(0);
       setCartItems([]);
     }
-  };
+  }, [isAuthenticated]);
 
   const updateCartCount = (newCount) => {
     setCartCount(newCount);
@@ -63,26 +64,22 @@ export const CartProvider = ({ children }) => {
       throw new Error("Please login to add items to cart");
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/cart", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productId, quantity }),
-      });
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://localhost:5000/api/cart", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ productId, quantity }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to add to cart");
-      }
-
-      // Refresh cart count
-      await fetchCartCount();
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      throw new Error("Failed to add to cart");
     }
+
+    // Refresh cart count
+    await fetchCartCount();
   };
 
   const removeFromCart = async (productId) => {
@@ -143,7 +140,7 @@ export const CartProvider = ({ children }) => {
   // Fetch cart count when authentication status changes
   useEffect(() => {
     fetchCartCount();
-  }, [isAuthenticated]);
+  }, [fetchCartCount]);
 
   const value = {
     cartCount,
@@ -160,4 +157,8 @@ export const CartProvider = ({ children }) => {
       {children}
     </CartContext.Provider>
   );
+};
+
+CartProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 }; 

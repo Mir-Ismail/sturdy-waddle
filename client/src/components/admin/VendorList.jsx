@@ -73,7 +73,6 @@ const VendorList = () => {
         throw new Error("Failed to fetch vendor details");
       }
 
-      const data = await response.json();
       setSelectedVendor({ vendor, products: [] });
       setShowViewModal(true);
     } catch (err) {
@@ -396,9 +395,8 @@ const VendorList = () => {
               <div className="vendor-detail">
                 <label>Status:</label>
                 <span
-                  className={`status-badge ${
-                    selectedVendor.vendor.status || "active"
-                  }`}
+                  className={`status-badge ${selectedVendor.vendor.status || "active"
+                    }`}
                 >
                   {selectedVendor.vendor.status || "active"}
                 </span>

@@ -1,6 +1,5 @@
-import React from "react";
 import "../Styles/compare.css"
-
+import PropTypes from "prop-types";
 const ComparisonCard = ({ icon, title, description }) => {
   return (
     <div className="comparison-type-card">
@@ -12,6 +11,12 @@ const ComparisonCard = ({ icon, title, description }) => {
       <button className="compare-btn">Compare Now</button>
     </div>
   );
+};
+
+ComparisonCard.propTypes = {
+  icon: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
 };
 
 export default ComparisonCard;

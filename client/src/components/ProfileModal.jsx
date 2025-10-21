@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, LogOut, User, Wallet, Grid, ShoppingCart, Heart, Clock, Star } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -301,7 +302,7 @@ function ProfileModal({ children }) {
               <div style={styles.menuList}>
                 {/* Dashboard - Only for vendors and admins */}
                 {isVendorOrAdmin() && (
-                  <button 
+                  <button
                     onClick={handleDashboard}
                     style={styles.menuItem}
                     onMouseEnter={(e) => {
@@ -321,7 +322,7 @@ function ProfileModal({ children }) {
                 {/* Customer-specific actions */}
                 {isCustomer() && (
                   <>
-                    <Link 
+                    <Link
                       to="/cart"
                       onClick={handleClose}
                       style={styles.menuItem}
@@ -338,7 +339,7 @@ function ProfileModal({ children }) {
                       <span style={styles.menuText}>My Cart</span>
                     </Link>
 
-                    <Link 
+                    <Link
                       to="/wishlist"
                       onClick={handleClose}
                       style={styles.menuItem}
@@ -355,7 +356,7 @@ function ProfileModal({ children }) {
                       <span style={styles.menuText}>Wishlist</span>
                     </Link>
 
-                    <Link 
+                    <Link
                       to="/favorites"
                       onClick={handleClose}
                       style={styles.menuItem}
@@ -372,7 +373,7 @@ function ProfileModal({ children }) {
                       <span style={styles.menuText}>Favorites</span>
                     </Link>
 
-                    <Link 
+                    <Link
                       to="/order-history"
                       onClick={handleClose}
                       style={styles.menuItem}
@@ -392,7 +393,7 @@ function ProfileModal({ children }) {
                 )}
 
                 {/* Common actions for all users */}
-                <button 
+                <button
                   onClick={handleEditProfile}
                   style={styles.menuItem}
                   onMouseEnter={(e) => {
@@ -408,7 +409,7 @@ function ProfileModal({ children }) {
                   <span style={styles.menuText}>Edit Profile</span>
                 </button>
 
-                <Link 
+                <Link
                   to="/wallet"
                   onClick={handleClose}
                   style={styles.menuItem}
@@ -451,5 +452,9 @@ function ProfileModal({ children }) {
     </>
   );
 }
+
+ProfileModal.propTypes = {
+  children: PropTypes.node,
+};
 
 export default ProfileModal;

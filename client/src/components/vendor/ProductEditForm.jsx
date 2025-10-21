@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FiUpload, FiSave, FiX, FiPlus, FiTrash2, FiEdit } from "react-icons/fi";
+import { useState, useRef, useEffect } from "react";
+import { FiUpload, FiSave, FiX, FiPlus, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 import "./ProductForm.css";
 
 const ProductEditForm = ({ product, onSave, onCancel }) => {
@@ -474,6 +475,12 @@ const ProductEditForm = ({ product, onSave, onCancel }) => {
             </form>
         </motion.div>
     );
+};
+
+ProductEditForm.propTypes = {
+    product: PropTypes.object.isRequired,
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
 };
 
 export default ProductEditForm;

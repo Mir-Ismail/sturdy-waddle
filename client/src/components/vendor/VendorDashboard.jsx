@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PropTypes from "prop-types";
 import {
   FiPackage,
   FiBarChart,
@@ -11,12 +12,10 @@ import {
   FiX,
   FiUpload,
   FiSave,
-  FiTrendingUp,
   FiShoppingBag,
   FiDollarSign,
   FiEye,
   FiArrowUp,
-  FiArrowDown,
   FiClock,
   FiCheckCircle,
   FiXCircle,
@@ -362,6 +361,7 @@ const VendorDashboard = () => {
   };
 
   // Order Details Modal Component
+  /* eslint-disable react/prop-types */
   const OrderDetailsModal = ({
     order,
     onClose,
@@ -618,6 +618,7 @@ const VendorDashboard = () => {
       </motion.div>
     );
   };
+  /* eslint-enable react/prop-types */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40">
       {/* Header */}
@@ -654,11 +655,10 @@ const VendorDashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                  }`}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   {tab.label}
@@ -734,7 +734,7 @@ const OverviewSection = ({ loading, stats }) => (
     <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
       <p className="text-gray-600">
-        Here's an overview of your business performance
+        Here&apos;s an overview of your business performance
       </p>
     </div>
 
@@ -811,7 +811,6 @@ const StatCard = ({ icon: Icon, title, value, change, changeLabel, color }) => {
 const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchProducts = async () => {
     try {
@@ -959,13 +958,12 @@ const ProductCard = ({ product, onDelete }) => (
       )}
       <div className="absolute top-3 right-3">
         <span
-          className={`px-3 py-1 rounded-lg text-xs font-bold ${
-            product.status === "approved"
-              ? "bg-green-100 text-green-700"
-              : product.status === "pending"
+          className={`px-3 py-1 rounded-lg text-xs font-bold ${product.status === "approved"
+            ? "bg-green-100 text-green-700"
+            : product.status === "pending"
               ? "bg-yellow-100 text-yellow-700"
               : "bg-red-100 text-red-700"
-          }`}
+            }`}
         >
           {product.status}
         </span>
@@ -1152,266 +1150,6 @@ const ProductForm = ({ onProductAdded }) => {
       specifications: prev.specifications.filter((_, i) => i !== index),
     }));
   };
-  const OrderDetailsModal = ({
-    order,
-    onClose,
-    onUpdateStatus,
-    getStatusColor,
-  }) => {
-    return (
-      <motion.div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      >
-        <motion.div
-          className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Order Details
-              </h2>
-              <p className="text-sm text-gray-600">
-                Order #{order._id?.slice(-8)}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
-            >
-              <FiX className="w-6 h-6 text-gray-600" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-6">
-            {/* Status and Date */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-sm text-gray-600 mb-2">Order Status</p>
-                <span
-                  className={`inline-block px-4 py-2 rounded-xl text-sm font-bold border ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-sm text-gray-600 mb-2">Order Date</p>
-                <p className="font-semibold text-gray-900">
-                  {new Date(order.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
-
-            {/* Customer Information */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <FiUser className="w-5 h-5 text-blue-600" />
-                Customer Information
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Name</p>
-                  <p className="font-semibold text-gray-900">
-                    {order.shippingAddress?.firstName}{" "}
-                    {order.shippingAddress?.lastName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Email</p>
-                  <p className="font-semibold text-gray-900 flex items-center gap-2">
-                    <FiMail className="w-4 h-4" />
-                    {order.shippingAddress?.email}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Phone</p>
-                  <p className="font-semibold text-gray-900 flex items-center gap-2">
-                    <FiPhone className="w-4 h-4" />
-                    {order.shippingAddress?.phone}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Address</p>
-                  <p className="font-semibold text-gray-900 flex items-start gap-2">
-                    <FiMapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                    <span>
-                      {order.shippingAddress?.street},{" "}
-                      {order.shippingAddress?.city},{" "}
-                      {order.shippingAddress?.state} -{" "}
-                      {order.shippingAddress?.zipCode}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Order Items */}
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Order Items
-              </h3>
-              <div className="space-y-3">
-                {order.items?.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-4 bg-gray-50 rounded-xl p-4"
-                  >
-                    <img
-                      src={item.product?.images?.[0] || "/placeholder.jpg"}
-                      alt={item.product?.name}
-                      className="w-20 h-20 object-cover rounded-lg bg-gray-200"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">
-                        {item.product?.name || "Product"}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Quantity: {item.quantity}
-                      </p>
-                      <p className="font-bold text-green-600">
-                        PKR {item.price?.toLocaleString()} × {item.quantity} =
-                        PKR {item.total?.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Order Summary
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal:</span>
-                  <span className="font-semibold">
-                    PKR {order.subtotal?.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>Shipping:</span>
-                  <span className="font-semibold">
-                    {order.shippingCost === 0 ? (
-                      <span className="text-green-600">FREE</span>
-                    ) : (
-                      `PKR ${order.shippingCost}`
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>Tax:</span>
-                  <span className="font-semibold">
-                    PKR {order.tax?.toLocaleString()}
-                  </span>
-                </div>
-                <div className="border-t border-gray-300 pt-2 flex justify-between">
-                  <span className="text-lg font-bold text-gray-900">
-                    Total:
-                  </span>
-                  <span className="text-2xl font-bold text-green-600">
-                    PKR {order.total?.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between text-gray-700 pt-2 border-t border-gray-200">
-                  <span>Payment Method:</span>
-                  <span className="font-semibold">{order.paymentMethod}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Order Notes */}
-            {order.notes && (
-              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  Customer Notes:
-                </h4>
-                <p className="text-gray-700">{order.notes}</p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-              {order.status === "pending" && (
-                <button
-                  onClick={() => {
-                    onUpdateStatus(order._id, "confirmed");
-                    onClose();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
-                >
-                  <FiCheckCircle className="w-5 h-5" />
-                  Confirm Order
-                </button>
-              )}
-
-              {order.status === "confirmed" && (
-                <button
-                  onClick={() => {
-                    onUpdateStatus(order._id, "processing");
-                    onClose();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
-                >
-                  <FiClock className="w-5 h-5" />
-                  Start Processing
-                </button>
-              )}
-
-              {order.status === "processing" && (
-                <button
-                  onClick={() => {
-                    onUpdateStatus(order._id, "shipped");
-                    onClose();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
-                >
-                  <FiPackage className="w-5 h-5" />
-                  Mark as Shipped
-                </button>
-              )}
-
-              {(order.status === "pending" || order.status === "confirmed") && (
-                <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to cancel this order?"
-                      )
-                    ) {
-                      onUpdateStatus(order._id, "cancelled");
-                      onClose();
-                    }
-                  }}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
-                >
-                  <FiXCircle className="w-5 h-5" />
-                  Cancel Order
-                </button>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    );
-  };
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-6">
       {error && (
@@ -1590,7 +1328,7 @@ const ProductForm = ({ onProductAdded }) => {
                 No specifications added yet
               </p>
               <p className="text-gray-400 text-xs mt-1">
-                Click "Add Specification" to add product details
+                Click &quot;Add Specification&quot; to add product details
               </p>
             </div>
           ) : (
@@ -1658,6 +1396,36 @@ const ProductForm = ({ onProductAdded }) => {
       </button>
     </form>
   );
+};
+
+ProductsSection.displayName = 'ProductsSection';
+
+// PropTypes validation
+OverviewSection.propTypes = {
+  loading: PropTypes.bool.isRequired,
+  stats: PropTypes.object.isRequired,
+};
+
+StatCard.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  change: PropTypes.string.isRequired,
+  changeLabel: PropTypes.string.isRequired,
+  color: PropTypes.string.isRequired,
+};
+
+ProductsSection.propTypes = {
+  onAddProduct: PropTypes.func.isRequired,
+};
+
+ProductCard.propTypes = {
+  product: PropTypes.object.isRequired,
+  onDelete: PropTypes.func.isRequired,
+};
+
+ProductForm.propTypes = {
+  onProductAdded: PropTypes.func.isRequired,
 };
 
 export default VendorDashboard;

@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   FiArrowRight,
   FiShield,
-  FiTrendingUp,
-  FiUsers,
+
   FiStar,
-  FiPackage,
   FiZap,
   FiSearch
 } from "react-icons/fi";
@@ -32,32 +30,7 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const features = [
-    {
-      icon: FiShield,
-      title: "Trusted Vendors",
-      description: "Verified sellers only",
-      color: "from-green-500 to-emerald-500"
-    },
-    {
-      icon: FiTrendingUp,
-      title: "Best Prices",
-      description: "Compare & save money",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      icon: FiUsers,
-      title: "50K+ Users",
-      description: "Join the community",
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      icon: FiStar,
-      title: "4.8 Rating",
-      description: "Highly rated platform",
-      color: "from-yellow-500 to-orange-500"
-    }
-  ];
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -79,14 +52,7 @@ const HeroSection = () => {
     }
   };
 
-  const floatingAnimation = {
-    y: [0, -10, 0],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }
-  };
+
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">

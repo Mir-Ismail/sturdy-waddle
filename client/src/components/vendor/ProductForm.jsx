@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
+import PropTypes from "prop-types";
 import { FiUpload, FiSave, FiX, FiPlus, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import "./ProductForm.css";
@@ -460,6 +461,10 @@ const ProductForm = ({ onProductAdded }) => {
       </form>
     </motion.div>
   );
+};
+
+ProductForm.propTypes = {
+  onProductAdded: PropTypes.func,
 };
 
 export default ProductForm;

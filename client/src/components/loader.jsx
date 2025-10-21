@@ -1,5 +1,4 @@
 // components/Loader.jsx
-import React from 'react';
 import '../index.css';
 
 const Loader = () => {

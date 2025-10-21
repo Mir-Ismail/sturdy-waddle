@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -10,15 +11,12 @@ import {
     FaCog,
     FaSignOutAlt,
     FaTimes,
-    FaBars,
     FaBox,
     FaChartLine,
     FaUsers,
     FaStore,
     FaPlus,
-    FaList,
     FaFileInvoice,
-    FaMoneyBillWave,
     FaQuestionCircle,
     FaBell
 } from 'react-icons/fa';
@@ -234,6 +232,11 @@ const ResponsiveSidebar = ({ isOpen, onClose }) => {
             </aside>
         </>
     );
+};
+
+ResponsiveSidebar.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
 };
 
 export default ResponsiveSidebar;

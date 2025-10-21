@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 import {
   FiArrowRight,
   FiChevronRight,
@@ -407,6 +408,24 @@ const EnhancedCompactProductCard = ({ product }) => {
       </div>
     </Link>
   );
+};
+
+// PropTypes validation
+ProductSection.propTypes = {
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
+  products: PropTypes.array,
+  emptyMessage: PropTypes.string,
+  emptyIcon: PropTypes.string,
+  showViewAll: PropTypes.bool,
+  viewAllLink: PropTypes.string,
+  sectionIcon: PropTypes.element,
+  sectionColor: PropTypes.string,
+  loading: PropTypes.bool,
+};
+
+EnhancedCompactProductCard.propTypes = {
+  product: PropTypes.object.isRequired,
 };
 
 export default ProductSection;

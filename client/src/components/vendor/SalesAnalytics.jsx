@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { FiTrendingUp, FiDollarSign, FiShoppingCart, FiPackage } from 'react-icons/fi';
-import './SalesAnalytics.css';
+import React, { useState, useEffect } from "react";
+import {
+  FiTrendingUp,
+  FiDollarSign,
+  FiShoppingCart,
+  FiPackage,
+} from "react-icons/fi";
+import "./SalesAnalytics.css";
 
 const SalesAnalytics = React.forwardRef((props, ref) => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [period, setPeriod] = useState('month');
+  const [period, setPeriod] = useState("month");
 
   useEffect(() => {
     fetchAnalytics();
@@ -14,35 +19,40 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
 
   // Expose refresh function for parent component
   React.useImperativeHandle(ref, () => ({
-    refresh: fetchAnalytics
+    refresh: fetchAnalytics,
   }));
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const token = localStorage.getItem('token');
+
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error("No authentication token found");
       }
 
-      const response = await fetch(`http://localhost:5000/api/vendor/analytics?period=${period}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:5000/api/vendor/analytics?period=${period}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch analytics`);
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: analytics`
+        );
       }
 
       const data = await response.json();
       setAnalytics(data);
     } catch (err) {
-      console.error('Analytics fetch error:', err);
+      console.error("Analytics fetch error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -50,9 +60,9 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR'
+    return new Intl.NumberFormat("en-PK", {
+      style: "currency",
+      currency: "PKR",
     }).format(amount);
   };
 
@@ -64,7 +74,7 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="analytics-error">
@@ -76,7 +86,7 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
       </div>
     );
   }
-  
+
   if (!analytics) {
     return (
       <div className="analytics-error">
@@ -143,10 +153,9 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
           <div className="card-content">
             <h3>Average Order Value</h3>
             <p className="card-value">
-              {analytics.totalOrders > 0 
+              {analytics.totalOrders > 0
                 ? formatCurrency(analytics.totalSales / analytics.totalOrders)
-                : formatCurrency(0)
-              }
+                : formatCurrency(0)}
             </p>
           </div>
         </div>
@@ -177,10 +186,12 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
                     <td>{product.quantity}</td>
                     <td>{formatCurrency(product.revenue)}</td>
                     <td>
-                      {analytics.totalSales > 0 
-                        ? `${((product.revenue / analytics.totalSales) * 100).toFixed(1)}%`
-                        : '0%'
-                      }
+                      {analytics.totalSales > 0
+                        ? `${(
+                            (product.revenue / analytics.totalSales) *
+                            100
+                          ).toFixed(1)}%`
+                        : "0%"}
                     </td>
                   </tr>
                 ))}
@@ -211,22 +222,22 @@ const SalesAnalytics = React.forwardRef((props, ref) => {
           <div className="insight-card">
             <h4>Best Performing Product</h4>
             <p>
-              {analytics.productSales.length > 0 
-                ? analytics.productSales.reduce((best, current) => 
+              {analytics.productSales.length > 0
+                ? analytics.productSales.reduce((best, current) =>
                     current.revenue > best.revenue ? current : best
                   ).name
-                : 'No data available'
-              }
+                : "No data available"}
             </p>
           </div>
-          
+
           <div className="insight-card">
             <h4>Sales Efficiency</h4>
             <p>
-              {analytics.totalOrders > 0 
-                ? `${analytics.totalItems / analytics.totalOrders} items per order`
-                : 'No orders yet'
-              }
+              {analytics.totalOrders > 0
+                ? `${
+                    analytics.totalItems / analytics.totalOrders
+                  } items per order`
+                : "No orders yet"}
             </p>
           </div>
         </div>
@@ -245,7 +256,7 @@ const TrendChart = ({ data }) => {
 
   const parseDate = (d) => new Date(d);
   const points = data
-    .map(d => ({ date: parseDate(d.date), sales: Number(d.sales || 0) }))
+    .map((d) => ({ date: parseDate(d.date), sales: Number(d.sales || 0) }))
     .sort((a, b) => a.date - b.date);
 
   if (points.length === 0) return null;
@@ -253,18 +264,26 @@ const TrendChart = ({ data }) => {
   const minX = points[0].date.getTime();
   const maxX = points[points.length - 1].date.getTime();
   const minY = 0;
-  const maxY = Math.max(...points.map(p => p.sales)) || 1;
+  const maxY = Math.max(...points.map((p) => p.sales)) || 1;
 
-  const xScale = (t) => padding.left + ((t - minX) / (maxX - minX || 1)) * innerW;
-  const yScale = (v) => padding.top + innerH - ((v - minY) / (maxY - minY || 1)) * innerH;
+  const xScale = (t) =>
+    padding.left + ((t - minX) / (maxX - minX || 1)) * innerW;
+  const yScale = (v) =>
+    padding.top + innerH - ((v - minY) / (maxY - minY || 1)) * innerH;
 
   const pathD = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.date.getTime())} ${yScale(p.sales)}`)
-    .join(' ');
+    .map(
+      (p, i) =>
+        `${i === 0 ? "M" : "L"} ${xScale(p.date.getTime())} ${yScale(p.sales)}`
+    )
+    .join(" ");
 
   // X axis ticks: first, middle, last
-  const xTicks = [points[0], points[Math.floor(points.length / 2)], points[points.length - 1]]
-    .filter(Boolean);
+  const xTicks = [
+    points[0],
+    points[Math.floor(points.length / 2)],
+    points[points.length - 1],
+  ].filter(Boolean);
 
   // Y axis ticks: 0, mid, max
   const yTicks = [0, Math.round(maxY / 2), maxY];
@@ -272,15 +291,42 @@ const TrendChart = ({ data }) => {
   return (
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Sales Trend">
       {/* Axes */}
-      <line x1={padding.left} y1={padding.top} x2={padding.left} y2={height - padding.bottom} stroke="#e5e7eb" />
-      <line x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} stroke="#e5e7eb" />
+      <line
+        x1={padding.left}
+        y1={padding.top}
+        x2={padding.left}
+        y2={height - padding.bottom}
+        stroke="#e5e7eb"
+      />
+      <line
+        x1={padding.left}
+        y1={height - padding.bottom}
+        x2={width - padding.right}
+        y2={height - padding.bottom}
+        stroke="#e5e7eb"
+      />
 
       {/* Gridlines and Y labels */}
       {yTicks.map((v, i) => (
         <g key={i}>
-          <line x1={padding.left} y1={yScale(v)} x2={width - padding.right} y2={yScale(v)} stroke="#f3f4f6" />
-          <text x={padding.left - 8} y={yScale(v)} textAnchor="end" alignmentBaseline="middle" fill="#64748b" fontSize="10">
-            {new Intl.NumberFormat('en-PK', { maximumFractionDigits: 0 }).format(v)}
+          <line
+            x1={padding.left}
+            y1={yScale(v)}
+            x2={width - padding.right}
+            y2={yScale(v)}
+            stroke="#f3f4f6"
+          />
+          <text
+            x={padding.left - 8}
+            y={yScale(v)}
+            textAnchor="end"
+            alignmentBaseline="middle"
+            fill="#64748b"
+            fontSize="10"
+          >
+            {new Intl.NumberFormat("en-PK", {
+              maximumFractionDigits: 0,
+            }).format(v)}
           </text>
         </g>
       ))}
@@ -290,12 +336,25 @@ const TrendChart = ({ data }) => {
 
       {/* Points */}
       {points.map((p, i) => (
-        <circle key={i} cx={xScale(p.date.getTime())} cy={yScale(p.sales)} r="3" fill="#2563eb" />
+        <circle
+          key={i}
+          cx={xScale(p.date.getTime())}
+          cy={yScale(p.sales)}
+          r="3"
+          fill="#2563eb"
+        />
       ))}
 
       {/* X labels */}
       {xTicks.map((p, i) => (
-        <text key={i} x={xScale(p.date.getTime())} y={height - padding.bottom + 16} textAnchor="middle" fill="#64748b" fontSize="10">
+        <text
+          key={i}
+          x={xScale(p.date.getTime())}
+          y={height - padding.bottom + 16}
+          textAnchor="middle"
+          fill="#64748b"
+          fontSize="10"
+        >
           {p.date.toLocaleDateString()}
         </text>
       ))}
@@ -303,4 +362,4 @@ const TrendChart = ({ data }) => {
   );
 };
 
-export default SalesAnalytics; 
+export default SalesAnalytics;

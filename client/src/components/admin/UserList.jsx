@@ -294,46 +294,60 @@ const UserList = () => {
                     </div>
                   </td>
                   <td>
-                    <div className="user-actions">
+                    <div className="user-actions flex flex-wrap gap-2 justify-center items-center">
+                      {/* View User */}
                       <button
-                        className="btn-secondary"
                         onClick={() => handleViewUser(user)}
                         title="View Details"
+                        className="p-2 sm:p-2.5 md:p-3 bg-blue-100 hover:bg-blue-200 text-blue-600 
+                 rounded-lg transition-all duration-200 flex items-center justify-center"
                       >
-                        <FiEye />
+                        <FiEye className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
+
+                      {/* Edit User */}
                       <button
-                        className="btn"
                         onClick={() => handleEditUser(user)}
                         title="Edit User"
+                        className="p-2 sm:p-2.5 md:p-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 
+                 rounded-lg transition-all duration-200 flex items-center justify-center"
                       >
-                        <FiEdit />
+                        <FiEdit className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
+
+                      {/* Suspend / Activate */}
                       {user.status === "suspended" ? (
                         <button
-                          className="btn-success"
                           onClick={() => handleActivateUser(user._id)}
                           disabled={actionLoading}
                           title="Activate User"
+                          className="p-2 sm:p-2.5 md:p-3 bg-green-100 hover:bg-green-200 text-green-600 
+                   rounded-lg transition-all duration-200 flex items-center justify-center 
+                   disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          <FiPlay />
+                          <FiPlay className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       ) : (
                         <button
-                          className="btn-warning"
                           onClick={() => handleSuspendUser(user._id)}
                           disabled={actionLoading}
                           title="Suspend User"
+                          className="p-2 sm:p-2.5 md:p-3 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 
+                   rounded-lg transition-all duration-200 flex items-center justify-center 
+                   disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          <FiPause />
+                          <FiPause className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       )}
+
+                      {/* Delete User */}
                       <button
-                        className="btn-danger"
                         onClick={() => handleDeleteUser(user)}
                         title="Delete User"
+                        className="p-2 sm:p-2.5 md:p-3 bg-red-100 hover:bg-red-200 text-red-600 
+                 rounded-lg transition-all duration-200 flex items-center justify-center"
                       >
-                        <FiTrash2 />
+                        <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                   </td>
@@ -466,17 +480,28 @@ const UserList = () => {
                 </select>
               </div>
             </div>
-            <div className="modal-actions">
+            <div className="modal-actions flex flex-wrap justify-end gap-3 mt-6">
+              {/* Cancel Button */}
               <button
-                className="btn-secondary"
                 onClick={() => setShowEditModal(false)}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium 
+               text-gray-700 bg-gray-100 hover:bg-gray-200 
+               rounded-lg transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Cancel
               </button>
+
+              {/* Update Button */}
               <button
-                className="btn"
                 onClick={handleUpdateUser}
                 disabled={actionLoading}
+                className="px-5 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium 
+               text-white bg-gradient-to-r from-blue-600 to-purple-600 
+               hover:from-blue-700 hover:to-purple-700 
+               rounded-lg transition-all duration-200 
+               disabled:opacity-60 disabled:cursor-not-allowed
+               focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 {actionLoading ? "Updating..." : "Update User"}
               </button>

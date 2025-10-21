@@ -21,7 +21,10 @@ export const getDashboardStats = async (req, res) => {
     const trendMap = new Map();
     orders.forEach((order) => {
       const d = new Date(order.date);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(d.getDate()).padStart(2, "0")}`;
       const amount = order.price * order.quantity;
       trendMap.set(key, (trendMap.get(key) || 0) + amount);
     });
@@ -62,15 +65,25 @@ export const getAllUsers = async (req, res) => {
 // Get all vendors
 export const getAllVendors = async (req, res) => {
   try {
-    const vendors = await User.find({ role: "vendor" })
-      .select("-password")
-      .sort({ createdAt: -1 });
+    const vendors = await User.find({ role: "vendor" }).lean();
 
-    res.json(vendors);
+    // Fetch product counts for each vendor
+    const counts = await Product.aggregate([
+      { $group: { _id: "$vendor", productCount: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    counts.forEach((c) => (countMap[c._id.toString()] = c.productCount));
+
+    const vendorsWithCounts = vendors.map((v) => ({
+      ...v,
+      productCount: countMap[v._id.toString()] || 0,
+    }));
+
+    res.json(vendorsWithCounts);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching vendors", error: error.message });
+    console.error("Error fetching vendors:", error);
+    res.status(500).json({ message: "Failed to fetch vendors" });
   }
 };
 
@@ -167,16 +180,16 @@ export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id).select("-password");
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.json(user);
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error fetching user", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error fetching user",
+      error: error.message,
     });
   }
 };
@@ -186,24 +199,26 @@ export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { username, email, role, status } = req.body;
-    
+
     const updateData = {};
     if (username) updateData.username = username;
     if (email) updateData.email = email;
     if (role) updateData.role = role;
     if (status !== undefined) updateData.status = status;
-    
-    const user = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
-    
+
+    const user = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+    }).select("-password");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.json({ message: "User updated successfully", user });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error updating user", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error updating user",
+      error: error.message,
     });
   }
 };
@@ -212,22 +227,22 @@ export const updateUser = async (req, res) => {
 export const suspendUser = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const user = await User.findByIdAndUpdate(
-      id, 
-      { status: "suspended" }, 
+      id,
+      { status: "suspended" },
       { new: true }
     ).select("-password");
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.json({ message: "User suspended successfully", user });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error suspending user", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error suspending user",
+      error: error.message,
     });
   }
 };
@@ -236,22 +251,22 @@ export const suspendUser = async (req, res) => {
 export const activateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const user = await User.findByIdAndUpdate(
-      id, 
-      { status: "active" }, 
+      id,
+      { status: "active" },
       { new: true }
     ).select("-password");
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.json({ message: "User activated successfully", user });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error activating user", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error activating user",
+      error: error.message,
     });
   }
 };
@@ -260,23 +275,23 @@ export const activateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const user = await User.findByIdAndDelete(id);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     // If user is a vendor, also delete their products
     if (user.role === "vendor") {
       await Product.deleteMany({ vendor: id });
     }
-    
+
     res.json({ message: "User deleted successfully" });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error deleting user", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error deleting user",
+      error: error.message,
     });
   }
 };
@@ -286,19 +301,19 @@ export const getVendorById = async (req, res) => {
   try {
     const { id } = req.params;
     const vendor = await User.findById(id).select("-password");
-    
+
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    
+
     // Get vendor's products
     const products = await Product.find({ vendor: id });
-    
+
     res.json({ vendor, products });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error fetching vendor", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error fetching vendor",
+      error: error.message,
     });
   }
 };
@@ -308,23 +323,25 @@ export const updateVendor = async (req, res) => {
   try {
     const { id } = req.params;
     const { username, email, status } = req.body;
-    
+
     const updateData = {};
     if (username) updateData.username = username;
     if (email) updateData.email = email;
     if (status !== undefined) updateData.status = status;
-    
-    const vendor = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
-    
+
+    const vendor = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+    }).select("-password");
+
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    
+
     res.json({ message: "Vendor updated successfully", vendor });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error updating vendor", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error updating vendor",
+      error: error.message,
     });
   }
 };
@@ -333,28 +350,25 @@ export const updateVendor = async (req, res) => {
 export const suspendVendor = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const vendor = await User.findByIdAndUpdate(
-      id, 
-      { status: "suspended" }, 
+      id,
+      { status: "suspended" },
       { new: true }
     ).select("-password");
-    
+
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    
+
     // Also suspend all vendor's products
-    await Product.updateMany(
-      { vendor: id },
-      { status: "suspended" }
-    );
-    
+    await Product.updateMany({ vendor: id }, { status: "suspended" });
+
     res.json({ message: "Vendor suspended successfully", vendor });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error suspending vendor", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error suspending vendor",
+      error: error.message,
     });
   }
 };
@@ -363,28 +377,25 @@ export const suspendVendor = async (req, res) => {
 export const activateVendor = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const vendor = await User.findByIdAndUpdate(
-      id, 
-      { status: "active" }, 
+      id,
+      { status: "active" },
       { new: true }
     ).select("-password");
-    
+
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    
+
     // Also activate all vendor's products
-    await Product.updateMany(
-      { vendor: id },
-      { status: "active" }
-    );
-    
+    await Product.updateMany({ vendor: id }, { status: "active" });
+
     res.json({ message: "Vendor activated successfully", vendor });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error activating vendor", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error activating vendor",
+      error: error.message,
     });
   }
 };
@@ -393,21 +404,21 @@ export const activateVendor = async (req, res) => {
 export const deleteVendor = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const vendor = await User.findByIdAndDelete(id);
-    
+
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    
+
     // Also delete all vendor's products
     await Product.deleteMany({ vendor: id });
-    
+
     res.json({ message: "Vendor deleted successfully" });
   } catch (error) {
-    res.status(500).json({ 
-      message: "Error deleting vendor", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error deleting vendor",
+      error: error.message,
     });
   }
 };

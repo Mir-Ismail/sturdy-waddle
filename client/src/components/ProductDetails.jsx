@@ -45,7 +45,7 @@ const ProductDetails = () => {
         const data = await response.json();
         setProduct(data.product || data);
       } catch (error) {
-        setError("Failed to fetch product details");
+        setError("Failed to fetch product details", error);
       } finally {
         setLoading(false);
       }
@@ -63,7 +63,7 @@ const ProductDetails = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setIsWishlisted(res.data.isWishlisted);
-      } catch { }
+      } catch {}
     };
     checkWishlist();
   }, [isAuthenticated, productId]);
@@ -121,7 +121,9 @@ const ProductDetails = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40">
         <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6" />
-        <p className="text-gray-700 font-semibold text-lg">Loading product details...</p>
+        <p className="text-gray-700 font-semibold text-lg">
+          Loading product details...
+        </p>
       </div>
     );
 
@@ -132,8 +134,12 @@ const ProductDetails = () => {
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FiPackage className="w-10 h-10 text-red-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Product Not Found</h2>
-          <p className="text-gray-600 mb-6">{error || "This product doesn't exist or has been removed."}</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            Product Not Found
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {error || "This product doesn't exist or has been removed."}
+          </p>
           <button
             onClick={() => navigate("/")}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 font-semibold flex items-center gap-2 mx-auto transition-all"
@@ -144,14 +150,16 @@ const ProductDetails = () => {
       </div>
     );
 
-  const discount = product.originalPrice && product.originalPrice > product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const discount =
+    product.originalPrice && product.originalPrice > product.price
+      ? Math.round(
+          ((product.originalPrice - product.price) / product.originalPrice) *
+            100
+        )
+      : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/40">
-
-
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Main Product Section */}
         <motion.div
@@ -173,7 +181,10 @@ const ProductDetails = () => {
                 )}
                 <motion.img
                   key={selectedImage}
-                  src={product.images?.[selectedImage] || "/placeholder-product.jpg"}
+                  src={
+                    product.images?.[selectedImage] ||
+                    "/placeholder-product.jpg"
+                  }
                   alt={product.name}
                   className="object-contain w-full h-full p-8"
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -188,12 +199,17 @@ const ProductDetails = () => {
                     <button
                       key={i}
                       onClick={() => setSelectedImage(i)}
-                      className={`aspect-square rounded-xl overflow-hidden border-3 transition-all hover:scale-105 ${selectedImage === i
-                        ? "border-blue-600 ring-2 ring-blue-600/20 scale-105"
-                        : "border-gray-200 hover:border-gray-300"
-                        }`}
+                      className={`aspect-square rounded-xl overflow-hidden border-3 transition-all hover:scale-105 ${
+                        selectedImage === i
+                          ? "border-blue-600 ring-2 ring-blue-600/20 scale-105"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img
+                        src={img}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -223,7 +239,10 @@ const ProductDetails = () => {
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <FiStar key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    <FiStar
+                      key={i}
+                      className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <span className="text-gray-600 font-medium">4.5</span>
@@ -245,7 +264,9 @@ const ProductDetails = () => {
                 </div>
                 {discount > 0 && (
                   <p className="text-green-600 font-semibold">
-                    You save PKR {(product.originalPrice - product.price).toLocaleString()} ({discount}%)
+                    You save PKR{" "}
+                    {(product.originalPrice - product.price).toLocaleString()} (
+                    {discount}%)
                   </p>
                 )}
               </div>
@@ -253,12 +274,13 @@ const ProductDetails = () => {
               {/* Stock Status */}
               <div className="mb-6">
                 <span
-                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${product.quantity > 20
-                    ? "bg-green-100 text-green-700 border border-green-200"
-                    : product.quantity > 0
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${
+                    product.quantity > 20
+                      ? "bg-green-100 text-green-700 border border-green-200"
+                      : product.quantity > 0
                       ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
                       : "bg-red-100 text-red-700 border border-red-200"
-                    }`}
+                  }`}
                 >
                   {product.quantity > 0 ? (
                     <>
@@ -277,7 +299,9 @@ const ProductDetails = () => {
               {/* Quantity Selector */}
               {product.quantity > 0 && (
                 <div className="mb-6">
-                  <label className="block font-bold text-gray-900 mb-3">Quantity</label>
+                  <label className="block font-bold text-gray-900 mb-3">
+                    Quantity
+                  </label>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center border-2 border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm">
                       <button
@@ -310,10 +334,11 @@ const ProductDetails = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={isAddingToCart || product.quantity <= 0}
-                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${product.quantity <= 0
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
-                    }`}
+                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${
+                    product.quantity <= 0
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                  }`}
                 >
                   <FiShoppingCart className="w-5 h-5" />
                   {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
@@ -323,18 +348,23 @@ const ProductDetails = () => {
                   <button
                     onClick={handleWishlist}
                     disabled={isAddingToWishlist}
-                    className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-md border-2 ${isWishlisted
-                      ? "bg-red-600 border-red-700 text-white hover:bg-red-700"
-                      : "bg-white border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
-                      }`}
+                    className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-md border-2 ${
+                      isWishlisted
+                        ? "bg-red-600 border-red-700 text-white hover:bg-red-700"
+                        : "bg-white border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
+                    }`}
                   >
-                    <FiHeart className={`w-5 h-5 ${isWishlisted ? 'fill-white' : ''}`} />
+                    <FiHeart
+                      className={`w-5 h-5 ${isWishlisted ? "fill-white" : ""}`}
+                    />
                     {isWishlisted ? "Wishlisted" : "Wishlist"}
                   </button>
 
                   <button
                     onClick={() =>
-                      navigate("/compare", { state: { productToCompare: product } })
+                      navigate("/compare", {
+                        state: { productToCompare: product },
+                      })
                     }
                     className="flex items-center justify-center gap-2 py-3.5 border-2 border-gray-300 rounded-xl text-gray-700 font-bold hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-md"
                   >
@@ -350,22 +380,34 @@ const ProductDetails = () => {
                   <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-2 shadow-md">
                     <FiTruck className="text-white w-6 h-6" />
                   </div>
-                  <span className="text-sm font-bold text-gray-900">Free Delivery</span>
-                  <span className="text-xs text-gray-600">On orders above PKR 2000</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    Free Delivery
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    On orders above PKR 2000
+                  </span>
                 </div>
                 <div className="flex flex-col items-center bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-4 border border-green-200/50">
                   <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-2 shadow-md">
                     <FiShield className="text-white w-6 h-6" />
                   </div>
-                  <span className="text-sm font-bold text-gray-900">1-Year Warranty</span>
-                  <span className="text-xs text-gray-600">Manufacturer warranty</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    1-Year Warranty
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    Manufacturer warranty
+                  </span>
                 </div>
                 <div className="flex flex-col items-center bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-4 border border-purple-200/50">
                   <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-2 shadow-md">
                     <FiRotateCcw className="text-white w-6 h-6" />
                   </div>
-                  <span className="text-sm font-bold text-gray-900">30-Day Return</span>
-                  <span className="text-xs text-gray-600">Easy returns policy</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    30-Day Return
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    Easy returns policy
+                  </span>
                 </div>
               </div>
             </div>
@@ -387,7 +429,8 @@ const ProductDetails = () => {
                 Product Description
               </h2>
               <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {product.description || "No description available for this product."}
+                {product.description ||
+                  "No description available for this product."}
               </p>
             </motion.div>
 
@@ -408,8 +451,12 @@ const ProductDetails = () => {
                       key={i}
                       className="flex justify-between items-center bg-gradient-to-br from-gray-50 to-gray-100/50 p-4 rounded-xl border border-gray-200"
                     >
-                      <span className="font-bold text-gray-900">{spec.key}</span>
-                      <span className="text-gray-700 font-medium">{spec.value}</span>
+                      <span className="font-bold text-gray-900">
+                        {spec.key}
+                      </span>
+                      <span className="text-gray-700 font-medium">
+                        {spec.value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -443,11 +490,15 @@ const ProductDetails = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-600 font-medium">Category</span>
-                  <span className="font-bold text-gray-900">{product.category}</span>
+                  <span className="font-bold text-gray-900">
+                    {product.category}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-600 font-medium">Product ID</span>
-                  <span className="font-mono text-sm text-gray-900">{product._id?.slice(-8)}</span>
+                  <span className="font-mono text-sm text-gray-900">
+                    {product._id?.slice(-8)}
+                  </span>
                 </div>
               </div>
 

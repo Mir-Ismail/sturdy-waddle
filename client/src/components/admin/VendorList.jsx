@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   FiPackage,
   FiMail,
@@ -217,8 +217,8 @@ const VendorList = () => {
 
   const filteredVendors = vendors.filter(
     (vendor) =>
-      vendor.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vendor.email.toLowerCase().includes(searchTerm.toLowerCase())
+      vendor.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) return <div className="loading">Loading vendors...</div>;
@@ -285,7 +285,7 @@ const VendorList = () => {
                   <td>
                     <div className="vendor-info">
                       <div className="vendor-avatar">
-                        {vendor.username.charAt(0).toUpperCase()}
+                        {vendor.username?.charAt(0).toUpperCase() || "?"}
                       </div>
                       <span>{vendor.username}</span>
                     </div>
@@ -318,27 +318,31 @@ const VendorList = () => {
                   <td>
                     <div className="vendor-actions">
                       <button
-                        className="btn-secondary"
                         onClick={() => handleViewVendor(vendor)}
                         title="View Details"
+                        className="p-2 sm:p-2.5 md:p-3 bg-blue-100 hover:bg-blue-200 text-blue-600 
+                 rounded-lg transition-all duration-200 flex items-center justify-center"
                       >
-                        <FiEye />
+                        <FiEye className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       <button
-                        className="btn"
                         onClick={() => handleEditVendor(vendor)}
-                        title="Edit Vendor"
+                        title="Edit User"
+                        className="p-2 sm:p-2.5 md:p-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 
+                 rounded-lg transition-all duration-200 flex items-center justify-center"
                       >
-                        <FiEdit />
+                        <FiEdit className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       {vendor.status === "suspended" ? (
                         <button
-                          className="btn-success"
                           onClick={() => handleActivateVendor(vendor._id)}
-                          disabled={actionLoading}
                           title="Activate Vendor"
+                          disabled={actionLoading}
+                          className="p-2 sm:p-2.5 md:p-3 bg-green-100 hover:bg-green-200 text-green-600 
+                   rounded-lg transition-all duration-200 flex items-center justify-center 
+                   disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          <FiPlay />
+                          <FiPlay className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       ) : (
                         <button
@@ -351,11 +355,12 @@ const VendorList = () => {
                         </button>
                       )}
                       <button
-                        className="btn-danger"
                         onClick={() => handleDeleteVendor(vendor)}
                         title="Delete Vendor"
+                        className="p-2 sm:p-2.5 md:p-3 bg-red-100 hover:bg-red-200 text-red-600 
+                 rounded-lg transition-all duration-200 flex items-center justify-center"
                       >
-                        <FiTrash2 />
+                        <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                   </td>
@@ -440,13 +445,16 @@ const VendorList = () => {
             </div>
             <div className="modal-actions">
               <button
-                className="btn-secondary"
                 onClick={() => setShowViewModal(false)}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium 
+               text-gray-700 bg-gray-100 hover:bg-gray-200 
+               rounded-lg transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Close
               </button>
               <button
-                className="btn"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                 onClick={() => {
                   setShowViewModal(false);
                   handleEditVendor(selectedVendor.vendor);
@@ -508,17 +516,25 @@ const VendorList = () => {
             </div>
             <div className="modal-actions">
               <button
-                className="btn-secondary"
                 onClick={() => setShowEditModal(false)}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium 
+               text-gray-700 bg-gray-100 hover:bg-gray-200 
+               rounded-lg transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Cancel
               </button>
               <button
-                className="btn"
                 onClick={handleUpdateVendor}
                 disabled={actionLoading}
+                className="px-5 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium 
+               text-white bg-gradient-to-r from-blue-600 to-purple-600 
+               hover:from-blue-700 hover:to-purple-700 
+               rounded-lg transition-all duration-200 
+               disabled:opacity-60 disabled:cursor-not-allowed
+               focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
-                {actionLoading ? "Updating..." : "Update Vendor"}
+                {actionLoading ? "Updating..." : "Update User"}
               </button>
             </div>
           </div>
@@ -551,8 +567,11 @@ const VendorList = () => {
             </div>
             <div className="modal-actions">
               <button
-                className="btn-secondary"
                 onClick={() => setShowDeleteModal(false)}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium 
+               text-gray-700 bg-gray-100 hover:bg-gray-200 
+               rounded-lg transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Cancel
               </button>

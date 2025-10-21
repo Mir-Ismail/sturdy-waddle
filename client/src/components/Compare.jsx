@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import {
   FiSearch,
   FiX,
@@ -13,23 +13,23 @@ import {
   FiAlertCircle,
   FiCheck,
   FiFilter,
-} from 'react-icons/fi';
+} from "react-icons/fi";
 
 const Compare = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [compareItems, setCompareItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
     if (location.state?.productToCompare) {
       const product = location.state.productToCompare;
-      if (!compareItems.find(item => item._id === product._id)) {
+      if (!compareItems.find((item) => item._id === product._id)) {
         setCompareItems([product]);
       }
     }
@@ -38,12 +38,14 @@ const Compare = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/products');
+        const response = await axios.get("http://localhost:5000/api/products");
         const products = response.data.products || [];
-        const uniqueCategories = [...new Set(products.map(p => p.category))].filter(Boolean);
-        setCategories(['all', ...uniqueCategories]);
+        const uniqueCategories = [
+          ...new Set(products.map((p) => p.category)),
+        ].filter(Boolean);
+        setCategories(["all", ...uniqueCategories]);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       }
     };
     fetchCategories();
@@ -58,8 +60,8 @@ const Compare = () => {
 
       try {
         const params = new URLSearchParams({ q: searchQuery, limit: 20 });
-        if (selectedCategory !== 'all') {
-          params.append('category', selectedCategory);
+        if (selectedCategory !== "all") {
+          params.append("category", selectedCategory);
         }
 
         const response = await axios.get(
@@ -67,7 +69,7 @@ const Compare = () => {
         );
         setSearchResults(response.data.products || []);
       } catch (error) {
-        console.error('Error searching products:', error);
+        console.error("Error searching products:", error);
         setSearchResults([]);
       }
     };
@@ -78,25 +80,39 @@ const Compare = () => {
 
   const addToCompare = (product) => {
     if (compareItems.length >= 4) {
-      alert('You can compare up to 4 products at a time');
+      alert("You can compare up to 4 products at a time");
       return;
     }
-    if (compareItems.find(item => item._id === product._id)) {
-      alert('Product already added to comparison');
+
+    // Prevent duplicates
+    if (compareItems.find((item) => item._id === product._id)) {
+      alert("Product already added to comparison");
       return;
     }
-    setCompareItems(prev => [...prev, product]);
-    setSearchQuery('');
+
+    // Enforce category match
+    if (compareItems.length > 0) {
+      const existingCategory = compareItems[0].category;
+      if (product.category !== existingCategory) {
+        alert(
+          `You can only compare products from the same category (${existingCategory}).`
+        );
+        return;
+      }
+    }
+
+    setCompareItems((prev) => [...prev, product]);
+    setSearchQuery("");
     setSearchResults([]);
     setIsSearchFocused(false);
   };
 
   const removeFromCompare = (id) => {
-    setCompareItems(prev => prev.filter(item => item._id !== id));
+    setCompareItems((prev) => prev.filter((item) => item._id !== id));
   };
 
   const clearAll = () => {
-    if (window.confirm('Are you sure you want to clear all products?')) {
+    if (window.confirm("Are you sure you want to clear all products?")) {
       setCompareItems([]);
     }
   };
@@ -107,61 +123,61 @@ const Compare = () => {
 
   const getAllSpecKeys = () => {
     const keys = new Set();
-    compareItems.forEach(product => {
-      product.specifications?.forEach(spec => keys.add(spec.key));
+    compareItems.forEach((product) => {
+      product.specifications?.forEach((spec) => keys.add(spec.key));
     });
     return Array.from(keys);
   };
 
   const getSpecValue = (product, key) => {
-    const spec = product.specifications?.find(s => s.key === key);
-    return spec ? spec.value : '—';
+    const spec = product.specifications?.find((s) => s.key === key);
+    return spec ? spec.value : "—";
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
   const handleAddToCart = async (productId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
       await axios.post(
-        'http://localhost:5000/api/cart',
+        "http://localhost:5000/api/cart",
         { productId, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Added to cart successfully!');
+      alert("Added to cart successfully!");
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('Failed to add to cart');
+      console.error("Error adding to cart:", error);
+      alert("Failed to add to cart");
     }
   };
 
   const handleAddToWishlist = async (productId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
       await axios.post(
-        'http://localhost:5000/api/user/wishlist',
+        "http://localhost:5000/api/user/wishlist",
         { productId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Added to wishlist successfully!');
+      alert("Added to wishlist successfully!");
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add to wishlist');
+      console.error("Error adding to wishlist:", error);
+      alert("Failed to add to wishlist");
     }
   };
 
@@ -181,7 +197,9 @@ const Compare = () => {
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                   Product Comparison
                 </h1>
-                <p className="text-gray-600 text-sm mt-0.5">Compare up to 4 products side by side</p>
+                <p className="text-gray-600 text-sm mt-0.5">
+                  Compare up to 4 products side by side
+                </p>
               </div>
             </div>
             {compareItems.length > 0 && (
@@ -204,10 +222,14 @@ const Compare = () => {
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-1">Search Products</h2>
+                <h2 className="text-lg font-bold text-gray-900 mb-1">
+                  Search Products
+                </h2>
                 <p className="text-sm text-gray-500">
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="font-semibold text-blue-600">{compareItems.length}</span>
+                    <span className="font-semibold text-blue-600">
+                      {compareItems.length}
+                    </span>
                     <span>of 4 selected</span>
                   </span>
                 </p>
@@ -226,19 +248,22 @@ const Compare = () => {
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-3">
                 <FiFilter className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Filter by Category</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Filter by Category
+                </span>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {categories.map(cat => (
+                {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${selectedCategory === cat
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                      selectedCategory === cat
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                   >
-                    {cat === 'all' ? 'All Categories' : cat}
+                    {cat === "all" ? "All Categories" : cat}
                   </button>
                 ))}
               </div>
@@ -261,7 +286,7 @@ const Compare = () => {
               {searchQuery && (
                 <button
                   onClick={() => {
-                    setSearchQuery('');
+                    setSearchQuery("");
                     setSearchResults([]);
                   }}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
@@ -303,13 +328,22 @@ const Compare = () => {
                         {product.name}
                       </h3>
                       <p className="text-xs text-gray-500 mb-1">
-                        {product.brand && <span className="font-medium">{product.brand}</span>}
-                        {product.brand && product.category && <span className="mx-1.5">•</span>}
+                        {product.brand && (
+                          <span className="font-medium">{product.brand}</span>
+                        )}
+                        {product.brand && product.category && (
+                          <span className="mx-1.5">•</span>
+                        )}
                         {product.category && <span>{product.category}</span>}
                       </p>
                       <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${product.quantity > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                          }`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${
+                            product.quantity > 0
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
                           {product.quantity > 0 ? (
                             <>
                               <FiCheck className="w-3 h-3" />
@@ -329,11 +363,12 @@ const Compare = () => {
                         <p className="text-lg font-bold text-gray-900">
                           {formatPrice(product.price)}
                         </p>
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <p className="text-xs text-gray-400 line-through">
-                            {formatPrice(product.originalPrice)}
-                          </p>
-                        )}
+                        {product.originalPrice &&
+                          product.originalPrice > product.price && (
+                            <p className="text-xs text-gray-400 line-through">
+                              {formatPrice(product.originalPrice)}
+                            </p>
+                          )}
                       </div>
                       <div className="w-10 h-10 bg-blue-600 group-hover:bg-blue-700 rounded-xl flex items-center justify-center transition-colors shadow-md">
                         <FiPlus className="w-5 h-5 text-white" />
@@ -352,9 +387,12 @@ const Compare = () => {
             <div className="w-28 h-28 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
               <FiSearch className="w-14 h-14 text-blue-600" />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">No Products Selected</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              No Products Selected
+            </h3>
             <p className="text-gray-600 max-w-lg mx-auto text-base leading-relaxed">
-              Search and select products from the search bar above to start comparing features, specifications, and prices side by side
+              Search and select products from the search bar above to start
+              comparing features, specifications, and prices side by side
             </p>
           </div>
         ) : (
@@ -367,7 +405,10 @@ const Compare = () => {
                       <span className="text-base">Product Features</span>
                     </th>
                     {compareItems.map((product) => (
-                      <th key={product._id} className="p-6 text-center min-w-[280px] relative group">
+                      <th
+                        key={product._id}
+                        className="p-6 text-center min-w-[280px] relative group"
+                      >
                         <button
                           onClick={() => removeFromCompare(product._id)}
                           className="absolute top-4 right-4 w-9 h-9 bg-red-500 hover:bg-red-600 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:scale-110 z-10"
@@ -388,9 +429,13 @@ const Compare = () => {
                             </div>
                           )}
                         </div>
-                        <h3 className="text-sm font-bold text-gray-900 px-2 leading-snug">{product.name}</h3>
+                        <h3 className="text-sm font-bold text-gray-900 px-2 leading-snug">
+                          {product.name}
+                        </h3>
                         {product.brand && (
-                          <p className="text-xs text-gray-500 mt-1 font-medium">{product.brand}</p>
+                          <p className="text-xs text-gray-500 mt-1 font-medium">
+                            {product.brand}
+                          </p>
                         )}
                       </th>
                     ))}
@@ -402,32 +447,41 @@ const Compare = () => {
                     <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">
                       <span className="flex items-center gap-2">Price</span>
                     </td>
-                    {compareItems.map(product => (
+                    {compareItems.map((product) => (
                       <td key={product._id} className="p-6 text-center">
                         <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                           {formatPrice(product.price)}
                         </div>
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <div className="flex flex-col items-center gap-1.5 mt-3">
-                            <span className="text-sm text-gray-400 line-through font-medium">
-                              {formatPrice(product.originalPrice)}
-                            </span>
-                            <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
-                              Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                            </span>
-                          </div>
-                        )}
+                        {product.originalPrice &&
+                          product.originalPrice > product.price && (
+                            <div className="flex flex-col items-center gap-1.5 mt-3">
+                              <span className="text-sm text-gray-400 line-through font-medium">
+                                {formatPrice(product.originalPrice)}
+                              </span>
+                              <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                                Save{" "}
+                                {Math.round(
+                                  ((product.originalPrice - product.price) /
+                                    product.originalPrice) *
+                                    100
+                                )}
+                                %
+                              </span>
+                            </div>
+                          )}
                       </td>
                     ))}
                   </tr>
 
                   {/* Brand Row */}
                   <tr className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
-                    <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">Brand</td>
-                    {compareItems.map(product => (
+                    <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">
+                      Brand
+                    </td>
+                    {compareItems.map((product) => (
                       <td key={product._id} className="p-6 text-center">
                         <span className="inline-block px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 rounded-xl font-semibold text-sm border border-gray-200">
-                          {product.brand || 'Not specified'}
+                          {product.brand || "Not specified"}
                         </span>
                       </td>
                     ))}
@@ -435,11 +489,13 @@ const Compare = () => {
 
                   {/* Category Row */}
                   <tr className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
-                    <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">Category</td>
-                    {compareItems.map(product => (
+                    <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">
+                      Category
+                    </td>
+                    {compareItems.map((product) => (
                       <td key={product._id} className="p-6 text-center">
                         <span className="inline-block px-4 py-2 bg-blue-100 text-blue-700 rounded-xl font-semibold text-sm">
-                          {product.category || 'Uncategorized'}
+                          {product.category || "Uncategorized"}
                         </span>
                       </td>
                     ))}
@@ -447,16 +503,19 @@ const Compare = () => {
 
                   {/* Stock Row */}
                   <tr className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
-                    <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">Availability</td>
-                    {compareItems.map(product => (
+                    <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">
+                      Availability
+                    </td>
+                    {compareItems.map((product) => (
                       <td key={product._id} className="p-6 text-center">
                         <span
-                          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${product.quantity > 20
-                            ? 'bg-green-100 text-green-700 border border-green-200'
-                            : product.quantity > 0
-                              ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
-                              : 'bg-red-100 text-red-700 border border-red-200'
-                            }`}
+                          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${
+                            product.quantity > 20
+                              ? "bg-green-100 text-green-700 border border-green-200"
+                              : product.quantity > 0
+                              ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                              : "bg-red-100 text-red-700 border border-red-200"
+                          }`}
                         >
                           {product.quantity > 0 ? (
                             <>
@@ -476,12 +535,20 @@ const Compare = () => {
 
                   {/* Specifications */}
                   {specKeys.map((key, index) => (
-                    <tr key={key} className={`border-b border-gray-100 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-gray-50/40' : ''}`}>
+                    <tr
+                      key={key}
+                      className={`border-b border-gray-100 hover:bg-blue-50/30 transition-colors ${
+                        index % 2 === 0 ? "bg-gray-50/40" : ""
+                      }`}
+                    >
                       <td className="p-6 font-bold text-gray-900 sticky left-0 bg-white z-10">
                         {key}
                       </td>
-                      {compareItems.map(product => (
-                        <td key={product._id} className="p-6 text-center text-gray-700 font-medium">
+                      {compareItems.map((product) => (
+                        <td
+                          key={product._id}
+                          className="p-6 text-center text-gray-700 font-medium"
+                        >
                           {getSpecValue(product, key)}
                         </td>
                       ))}
@@ -493,16 +560,17 @@ const Compare = () => {
                     <td className="p-6 font-bold text-gray-900 sticky left-0 bg-gradient-to-r from-gray-50 to-blue-50/50 z-10">
                       Actions
                     </td>
-                    {compareItems.map(product => (
+                    {compareItems.map((product) => (
                       <td key={product._id} className="p-6">
                         <div className="space-y-3">
                           <button
                             onClick={() => handleAddToCart(product._id)}
                             disabled={product.quantity === 0}
-                            className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-all duration-200 shadow-md ${product.quantity === 0
-                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5'
-                              }`}
+                            className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-all duration-200 shadow-md ${
+                              product.quantity === 0
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                            }`}
                           >
                             <FiShoppingCart className="w-5 h-5" />
                             Add to Cart
@@ -537,7 +605,8 @@ const Compare = () => {
           <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
             <FiAlertCircle className="w-5 h-5 text-blue-600" />
             <span className="font-medium">
-              Prices and specifications are subject to change. Always verify details before making a purchase.
+              Prices and specifications are subject to change. Always verify
+              details before making a purchase.
             </span>
           </div>
         </div>

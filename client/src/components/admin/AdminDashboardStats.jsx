@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { FiUsers, FiPackage, FiShoppingCart, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import {
+  FiUsers,
+  FiPackage,
+  FiShoppingCart,
+  FiDollarSign,
+  FiTrendingUp,
+} from "react-icons/fi";
 
 const AdminDashboardStats = () => {
   const [stats, setStats] = useState(null);
@@ -12,16 +18,16 @@ const AdminDashboardStats = () => {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/admin/stats', {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/admin/stats", {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch dashboard stats');
+        throw new Error("Failed to fetch dashboard stats");
       }
 
       const data = await response.json();
@@ -34,9 +40,9 @@ const AdminDashboardStats = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR'
+    return new Intl.NumberFormat("en-PK", {
+      style: "currency",
+      currency: "PKR",
     }).format(amount);
   };
 
@@ -100,7 +106,7 @@ const AdminDashboardStats = () => {
 
       {/* Sales Trend (Dynamic) */}
       <div className="metrics-section">
-        <div className="metric-card" style={{ gridColumn: '1 / -1' }}>
+        <div className="metric-card" style={{ gridColumn: "1 / -1" }}>
           <h3>Sales Trend</h3>
           {Array.isArray(stats.salesTrend) && stats.salesTrend.length > 0 ? (
             <AdminTrendChart data={stats.salesTrend} />
@@ -126,40 +132,21 @@ const AdminDashboardStats = () => {
           <div className="health-indicators">
             <div className="health-item">
               <span className="indicator good"></span>
-              <span>Users: {stats.userCount > 0 ? 'Active' : 'No users'}</span>
+              <span>Users: {stats.userCount > 0 ? "Active" : "No users"}</span>
             </div>
             <div className="health-item">
               <span className="indicator good"></span>
-              <span>Vendors: {stats.vendorCount > 0 ? 'Active' : 'No vendors'}</span>
+              <span>
+                Vendors: {stats.vendorCount > 0 ? "Active" : "No vendors"}
+              </span>
             </div>
             <div className="health-item">
               <span className="indicator good"></span>
-              <span>Products: {stats.productCount > 0 ? 'Available' : 'No products'}</span>
+              <span>
+                Products: {stats.productCount > 0 ? "Available" : "No products"}
+              </span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <h3>Quick Actions</h3>
-        <div className="actions-grid">
-          <button className="action-btn">
-            <FiUsers />
-            <span>Manage Users</span>
-          </button>
-          <button className="action-btn">
-            <FiPackage />
-            <span>Manage Vendors</span>
-          </button>
-          <button className="action-btn">
-            <FiShoppingCart />
-            <span>View Orders</span>
-          </button>
-          <button className="action-btn">
-            <FiTrendingUp />
-            <span>Analytics</span>
-          </button>
         </div>
       </div>
 
@@ -187,7 +174,7 @@ const AdminTrendChart = ({ data }) => {
   const innerH = height - padding.top - padding.bottom;
 
   const points = (Array.isArray(data) ? data : [])
-    .map(d => ({ date: new Date(d.date), sales: Number(d.sales || 0) }))
+    .map((d) => ({ date: new Date(d.date), sales: Number(d.sales || 0) }))
     .sort((a, b) => a.date - b.date);
 
   if (points.length === 0) return null;
@@ -195,40 +182,93 @@ const AdminTrendChart = ({ data }) => {
   const minX = points[0].date.getTime();
   const maxX = points[points.length - 1].date.getTime();
   const minY = 0;
-  const maxY = Math.max(...points.map(p => p.sales)) || 1;
+  const maxY = Math.max(...points.map((p) => p.sales)) || 1;
 
-  const xScale = (t) => padding.left + ((t - minX) / (maxX - minX || 1)) * innerW;
-  const yScale = (v) => padding.top + innerH - ((v - minY) / (maxY - minY || 1)) * innerH;
+  const xScale = (t) =>
+    padding.left + ((t - minX) / (maxX - minX || 1)) * innerW;
+  const yScale = (v) =>
+    padding.top + innerH - ((v - minY) / (maxY - minY || 1)) * innerH;
 
   const pathD = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.date.getTime())} ${yScale(p.sales)}`)
-    .join(' ');
+    .map(
+      (p, i) =>
+        `${i === 0 ? "M" : "L"} ${xScale(p.date.getTime())} ${yScale(p.sales)}`
+    )
+    .join(" ");
 
-  const xTicks = [points[0], points[Math.floor(points.length / 2)], points[points.length - 1]]
-    .filter(Boolean);
+  const xTicks = [
+    points[0],
+    points[Math.floor(points.length / 2)],
+    points[points.length - 1],
+  ].filter(Boolean);
   const yTicks = [0, Math.round(maxY / 2), maxY];
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Platform Sales Trend" style={{ width: '100%', height: '280px' }}>
-      <line x1={padding.left} y1={padding.top} x2={padding.left} y2={height - padding.bottom} stroke="#e5e7eb" />
-      <line x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} stroke="#e5e7eb" />
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label="Platform Sales Trend"
+      style={{ width: "100%", height: "280px" }}
+    >
+      <line
+        x1={padding.left}
+        y1={padding.top}
+        x2={padding.left}
+        y2={height - padding.bottom}
+        stroke="#e5e7eb"
+      />
+      <line
+        x1={padding.left}
+        y1={height - padding.bottom}
+        x2={width - padding.right}
+        y2={height - padding.bottom}
+        stroke="#e5e7eb"
+      />
       {yTicks.map((v, i) => (
         <g key={i}>
-          <line x1={padding.left} y1={yScale(v)} x2={width - padding.right} y2={yScale(v)} stroke="#f3f4f6" />
-          <text x={padding.left - 8} y={yScale(v)} textAnchor="end" alignmentBaseline="middle" fill="#64748b" fontSize="10">
-            {new Intl.NumberFormat('en-PK', { maximumFractionDigits: 0 }).format(v)}
+          <line
+            x1={padding.left}
+            y1={yScale(v)}
+            x2={width - padding.right}
+            y2={yScale(v)}
+            stroke="#f3f4f6"
+          />
+          <text
+            x={padding.left - 8}
+            y={yScale(v)}
+            textAnchor="end"
+            alignmentBaseline="middle"
+            fill="#64748b"
+            fontSize="10"
+          >
+            {new Intl.NumberFormat("en-PK", {
+              maximumFractionDigits: 0,
+            }).format(v)}
           </text>
         </g>
       ))}
       <path d={pathD} fill="none" stroke="#8b5cf6" strokeWidth="2" />
       {points.map((p, i) => (
-        <circle key={i} cx={xScale(p.date.getTime())} cy={yScale(p.sales)} r="3" fill="#6366f1" />
+        <circle
+          key={i}
+          cx={xScale(p.date.getTime())}
+          cy={yScale(p.sales)}
+          r="3"
+          fill="#6366f1"
+        />
       ))}
       {xTicks.map((p, i) => (
-        <text key={i} x={xScale(p.date.getTime())} y={height - padding.bottom + 16} textAnchor="middle" fill="#64748b" fontSize="10">
+        <text
+          key={i}
+          x={xScale(p.date.getTime())}
+          y={height - padding.bottom + 16}
+          textAnchor="middle"
+          fill="#64748b"
+          fontSize="10"
+        >
           {p.date.toLocaleDateString()}
         </text>
       ))}
     </svg>
   );
-}; 
+};

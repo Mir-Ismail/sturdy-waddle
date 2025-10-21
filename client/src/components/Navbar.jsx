@@ -13,7 +13,7 @@ import {
   FiTruck,
   FiGrid,
   FiMapPin,
-  FiHeadphones
+  FiHeadphones,
 } from "react-icons/fi";
 import ProfileModal from "./ProfileModal";
 import CartModal from "./CartModal";
@@ -34,8 +34,8 @@ const Navbar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 0);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMenu = () => {
@@ -84,22 +84,22 @@ const Navbar = () => {
     ...(!isAuthenticated ? [{ name: "Login", href: "/login" }] : []),
     ...(isAuthenticated
       ? [
-        // Dashboard - Vendors and Admins only
-        ...(isVendorOrAdmin()
-          ? [
-            {
-              name: "Dashboard",
-              href: "/dashboard",
-            },
-          ]
-          : []),
+          // Dashboard - Vendors and Admins only
+          ...(isVendorOrAdmin()
+            ? [
+                {
+                  name: "Dashboard",
+                  href: "/dashboard",
+                },
+              ]
+            : []),
 
-        // New Arrivals - All authenticated users
-        {
-          name: "New Arrivals",
-          href: "/new-arrivals",
-        },
-      ]
+          // New Arrivals - All authenticated users
+          {
+            name: "New Arrivals",
+            href: "/new-arrivals",
+          },
+        ]
       : []),
   ];
 
@@ -109,7 +109,7 @@ const Navbar = () => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -141,16 +141,26 @@ const Navbar = () => {
       </div>
 
       {/* Main Header */}
-      <header className={`transition-all duration-300 ${scrolled ? 'py-2' : 'py-3'} bg-white`}>
+      <header
+        className={`transition-all duration-300 ${
+          scrolled ? "py-2" : "py-3"
+        } bg-white`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2 flex-shrink-0 group">
+            <Link
+              to="/"
+              className="flex items-center space-x-2 flex-shrink-0 group"
+            >
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <FiGrid className="text-white w-5 h-5" />
               </div>
               <span className="text-xl font-bold">
-                Market<span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Match</span>
+                Market
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Match
+                </span>
               </span>
             </Link>
 
@@ -204,10 +214,12 @@ const Navbar = () => {
                       >
                         <FiShoppingCart className="w-6 h-6" />
                         {cartCount > 0 && (
-                          <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 
+                          <span
+                            className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 
                                          bg-gradient-to-r from-blue-600 to-purple-600 
                                          text-white text-xs rounded-full flex items-center 
-                                         justify-center font-semibold shadow-lg">
+                                         justify-center font-semibold shadow-lg"
+                          >
                             {cartCount}
                           </span>
                         )}
@@ -221,10 +233,12 @@ const Navbar = () => {
                       {/* Notifications */}
                       <button className="relative p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors">
                         <FiBell className="w-6 h-6" />
-                        <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 
+                        <span
+                          className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 
                                        bg-gradient-to-r from-blue-600 to-purple-600 
                                        text-white text-xs rounded-full flex items-center 
-                                       justify-center font-semibold shadow-lg">
+                                       justify-center font-semibold shadow-lg"
+                        >
                           3
                         </span>
                       </button>
@@ -260,7 +274,7 @@ const Navbar = () => {
                               {user?.name || user?.email}
                             </p>
                             <p className="text-xs text-gray-500 capitalize">
-                              {user?.role || 'Customer'}
+                              {user?.role || "Customer"}
                             </p>
                           </div>
                           <FiChevronDown className="w-4 h-4 text-gray-400" />
@@ -295,7 +309,11 @@ const Navbar = () => {
                 className="md:hidden p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
                 onClick={toggleMenu}
               >
-                {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+                {isOpen ? (
+                  <FiX className="w-6 h-6" />
+                ) : (
+                  <FiMenu className="w-6 h-6" />
+                )}
               </button>
             </div>
           </div>
@@ -308,31 +326,30 @@ const Navbar = () => {
           <div className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-8">
               {/* Categories Dropdown */}
-              <div className="relative">
+              <div
+                className="relative"
+                onMouseEnter={() => setShowCategories(true)}
+                onMouseLeave={() => setShowCategories(false)}
+              >
                 <button
                   className="flex items-center space-x-2 px-4 py-2 text-sm font-medium 
-                           text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                  onMouseEnter={() => setShowCategories(true)}
-                  onMouseLeave={() => setShowCategories(false)}
+               text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                 >
                   <FiGrid className="w-4 h-4" />
                   <span>All Categories</span>
                   <FiChevronDown className="w-4 h-4" />
                 </button>
 
-                {/* Categories Dropdown Menu */}
                 {showCategories && (
                   <div
-                    className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl 
-                             shadow-xl border border-gray-100 z-50 py-2 animate-fadeIn"
-                    onMouseEnter={() => setShowCategories(true)}
-                    onMouseLeave={() => setShowCategories(false)}
+                    className="absolute top-full left-0 w-64 bg-white rounded-xl 
+                 shadow-xl border border-gray-100 z-50 py-2 animate-fadeIn"
                   >
                     <Link
                       to="/products"
                       className="block w-full text-left px-4 py-3 text-sm text-gray-900 font-semibold 
-                               hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 
-                               border-b border-gray-100"
+                 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 
+                 border-b border-gray-100"
                     >
                       <div className="flex items-center space-x-3">
                         <FiGrid className="w-4 h-4" />
@@ -342,9 +359,11 @@ const Navbar = () => {
                     {categories.map((category) => (
                       <Link
                         key={category}
-                        to={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
+                        to={`/category/${category
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")}`}
                         className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 
-                                 hover:text-blue-600 transition-colors duration-150"
+                   hover:text-blue-600 transition-colors duration-150"
                       >
                         {category}
                       </Link>
@@ -393,8 +412,14 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsOpen(false)}>
-          <div className="absolute inset-y-0 right-0 w-80 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="absolute inset-y-0 right-0 w-80 bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
               <button
@@ -443,12 +468,16 @@ const Navbar = () => {
               ))}
 
               <div className="pt-4 border-t border-gray-100">
-                <h3 className="px-4 text-sm font-semibold text-gray-900 mb-3">Categories</h3>
+                <h3 className="px-4 text-sm font-semibold text-gray-900 mb-3">
+                  Categories
+                </h3>
                 <div className="space-y-2">
                   {categories.map((category) => (
                     <Link
                       key={category}
-                      to={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
+                      to={`/category/${category
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       className="block w-full text-left py-2 px-4 text-sm text-gray-600 hover:bg-blue-50 
                                hover:text-blue-600 rounded-lg transition-all duration-200"
                       onClick={() => setIsOpen(false)}
@@ -471,10 +500,7 @@ const Navbar = () => {
       )}
 
       {/* Cart Modal */}
-      <CartModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 };

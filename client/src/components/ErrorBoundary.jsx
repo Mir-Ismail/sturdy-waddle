@@ -1,95 +1,93 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
 class ErrorBoundary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { hasError: false, error: null, errorInfo: null };
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Log error to console in development
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error caught by boundary:", error, errorInfo);
     }
 
-    static getDerivedStateFromError(error) {
-        // Update state so the next render will show the fallback UI
-        return { hasError: true };
-    }
+    this.setState({
+      error: error,
+      errorInfo: errorInfo,
+    });
 
-    componentDidCatch(error, errorInfo) {
-        // Log error to console in development
-        if (process.env.NODE_ENV === 'development') {
-            console.error('Error caught by boundary:', error, errorInfo);
-        }
+    // Here you could also log the error to an error reporting service
+    // logErrorToService(error, errorInfo);
+  }
 
-        this.setState({
-            error: error,
-            errorInfo: errorInfo
-        });
+  handleReset = () => {
+    this.setState({ hasError: false, error: null, errorInfo: null });
+  };
 
-        // Here you could also log the error to an error reporting service
-        // logErrorToService(error, errorInfo);
-    }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="error-container"
+          >
+            <div className="error-icon">
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+            </div>
 
-    handleReset = () => {
-        this.setState({ hasError: false, error: null, errorInfo: null });
-    };
+            <h2 className="error-title">Oops! Something went wrong</h2>
+            <p className="error-message">
+              We're sorry, but something unexpected happened. Please try
+              refreshing the page.
+            </p>
 
-    render() {
-        if (this.state.hasError) {
-            return (
-                <div className="error-boundary">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="error-container"
-                    >
-                        <div className="error-icon">
-                            <svg
-                                width="64"
-                                height="64"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="15" y1="9" x2="9" y2="15" />
-                                <line x1="9" y1="9" x2="15" y2="15" />
-                            </svg>
-                        </div>
+            <div className="error-actions">
+              <button onClick={this.handleReset} className="btn btn-primary">
+                Try Again
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="btn btn-secondary"
+              >
+                Refresh Page
+              </button>
+            </div>
 
-                        <h2 className="error-title">Oops! Something went wrong</h2>
-                        <p className="error-message">
-                            We're sorry, but something unexpected happened. Please try refreshing the page.
-                        </p>
+            {process.env.NODE_ENV === "development" && this.state.error && (
+              <details className="error-details">
+                <summary>Error Details (Development Only)</summary>
+                <pre className="error-stack">
+                  {this.state.error && this.state.error.toString()}
+                  <br />
+                  {this.state.errorInfo.componentStack}
+                </pre>
+              </details>
+            )}
+          </motion.div>
 
-                        <div className="error-actions">
-                            <button
-                                onClick={this.handleReset}
-                                className="btn btn-primary"
-                            >
-                                Try Again
-                            </button>
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="btn btn-secondary"
-                            >
-                                Refresh Page
-                            </button>
-                        </div>
-
-                        {process.env.NODE_ENV === 'development' && this.state.error && (
-                            <details className="error-details">
-                                <summary>Error Details (Development Only)</summary>
-                                <pre className="error-stack">
-                                    {this.state.error && this.state.error.toString()}
-                                    <br />
-                                    {this.state.errorInfo.componentStack}
-                                </pre>
-                            </details>
-                        )}
-                    </motion.div>
-
-                    <style jsx>{`
+          <style>{`
             .error-boundary {
               min-height: 100vh;
               display: flex;
@@ -184,12 +182,12 @@ class ErrorBoundary extends React.Component {
               word-break: break-all;
             }
           `}</style>
-                </div>
-            );
-        }
-
-        return this.props.children;
+        </div>
+      );
     }
+
+    return this.props.children;
+  }
 }
 
 export default ErrorBoundary;

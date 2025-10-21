@@ -11,7 +11,6 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import ResponsiveHeader from "./components/ResponsiveHeader";
 import ResponsiveFooter from "./components/ResponsiveFooter";
 import ResponsiveSidebar from "./components/ResponsiveSidebar";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -31,7 +30,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
 import ErrorBoundary from "./components/ErrorBoundary";
-import Compare from './components/Compare';
+import Compare from "./components/Compare";
 import Checkout from "./pages/Checkout";
 import UserOrderHistory from "./pages/userOrders";
 import Navbar from "./components/Navbar";
@@ -59,9 +58,7 @@ const Layout = ({ children }) => {
           />
         </>
       )}
-      <main className="main-content">
-        {children}
-      </main>
+      <main className="main-content">{children}</main>
       {showNavbar && <ResponsiveFooter />}
     </>
   );
@@ -246,10 +243,22 @@ const AppRoutes = () => {
       />
 
       {/* Specific Category Routes */}
-      <Route path="/home-appliances" element={<Navigate to="/category/home-appliances" replace />} />
-      <Route path="/audio-video" element={<Navigate to="/category/audio-video" replace />} />
-      <Route path="/refrigerator" element={<Navigate to="/category/refrigerator" replace />} />
-      <Route path="/gift-cards" element={<Navigate to="/category/gift-cards" replace />} />
+      <Route
+        path="/home-appliances"
+        element={<Navigate to="/category/home-appliances" replace />}
+      />
+      <Route
+        path="/audio-video"
+        element={<Navigate to="/category/audio-video" replace />}
+      />
+      <Route
+        path="/refrigerator"
+        element={<Navigate to="/category/refrigerator" replace />}
+      />
+      <Route
+        path="/gift-cards"
+        element={<Navigate to="/category/gift-cards" replace />}
+      />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

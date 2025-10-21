@@ -28,7 +28,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import SalesAnalytics from "./SalesAnalytics";
-import ProductEditForm from "./ProductEditForm";
 
 const VendorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -90,7 +89,6 @@ const VendorDashboard = () => {
     setShowAddProduct(false);
   };
 
-
   // Add this to your VendorDashboard.jsx
 
   // 1. Update the tabs array to include Orders:
@@ -113,12 +111,15 @@ const VendorDashboard = () => {
         setLoading(true);
         setError(null);
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/vendor/orders", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "http://localhost:5000/api/vendor/orders",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         const data = await response.json();
 
@@ -229,7 +230,9 @@ const VendorDashboard = () => {
         className="space-y-6"
       >
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Order Management</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            Order Management
+          </h2>
           <p className="text-gray-600">Track and manage your customer orders</p>
         </div>
 
@@ -238,8 +241,12 @@ const VendorDashboard = () => {
             <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <FiShoppingBag className="w-12 h-12 text-gray-400" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">No Orders Yet</h3>
-            <p className="text-gray-600">Orders containing your products will appear here</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              No Orders Yet
+            </h3>
+            <p className="text-gray-600">
+              Orders containing your products will appear here
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 overflow-hidden">
@@ -247,18 +254,35 @@ const VendorDashboard = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Order</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Customer</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Date</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Items</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Total</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Status</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Actions</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Order
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Customer
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Date
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Items
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Total
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Status
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((order) => (
-                    <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr
+                      key={order._id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
                       <td className="py-4 px-6">
                         <span className="font-mono text-sm text-gray-600">
                           #{order.orderNumber || order._id?.slice(-8)}
@@ -266,27 +290,43 @@ const VendorDashboard = () => {
                       </td>
                       <td className="py-4 px-6">
                         <p className="font-medium text-gray-900">
-                          {order.shippingAddress?.firstName || order.user?.firstName || ''}{' '}
-                          {order.shippingAddress?.lastName || order.user?.lastName || ''}
+                          {order.shippingAddress?.firstName ||
+                            order.user?.firstName ||
+                            ""}{" "}
+                          {order.shippingAddress?.lastName ||
+                            order.user?.lastName ||
+                            ""}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {order.shippingAddress?.email || order.user?.email || 'N/A'}
+                          {order.shippingAddress?.email ||
+                            order.user?.email ||
+                            "N/A"}
                         </p>
                       </td>
                       <td className="py-4 px-6 text-gray-600">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6">
-                        <span className="text-gray-700">{order.items?.length || 0} item(s)</span>
+                        <span className="text-gray-700">
+                          {order.items?.length || 0} item(s)
+                        </span>
                       </td>
                       <td className="py-4 px-6 font-bold text-green-600">
-                        PKR {(order.vendorSubtotal || order.total || 0).toLocaleString()}
+                        PKR{" "}
+                        {(
+                          order.vendorSubtotal ||
+                          order.total ||
+                          0
+                        ).toLocaleString()}
                       </td>
                       <td className="py-4 px-6">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(order.status)}`}
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                            order.status
+                          )}`}
                         >
-                          {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                          {order.status?.charAt(0).toUpperCase() +
+                            order.status?.slice(1)}
                         </span>
                       </td>
                       <td className="py-4 px-6">
@@ -322,7 +362,12 @@ const VendorDashboard = () => {
   };
 
   // Order Details Modal Component
-  const OrderDetailsModal = ({ order, onClose, onUpdateStatus, getStatusColor }) => {
+  const OrderDetailsModal = ({
+    order,
+    onClose,
+    onUpdateStatus,
+    getStatusColor,
+  }) => {
     return (
       <motion.div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -341,7 +386,9 @@ const VendorDashboard = () => {
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between z-10">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Order Details
+              </h2>
               <p className="text-sm text-gray-600">
                 Order #{order.orderNumber || order._id?.slice(-8)}
               </p>
@@ -364,7 +411,8 @@ const VendorDashboard = () => {
                     order.status
                   )}`}
                 >
-                  {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                  {order.status?.charAt(0).toUpperCase() +
+                    order.status?.slice(1)}
                 </span>
               </div>
               <div className="bg-gray-50 rounded-xl p-4">
@@ -391,22 +439,22 @@ const VendorDashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Name</p>
                   <p className="font-semibold text-gray-900">
-                    {order.shippingAddress?.firstName || ''}{' '}
-                    {order.shippingAddress?.lastName || ''}
+                    {order.shippingAddress?.firstName || ""}{" "}
+                    {order.shippingAddress?.lastName || ""}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Email</p>
                   <p className="font-semibold text-gray-900 flex items-center gap-2">
                     <FiMail className="w-4 h-4" />
-                    {order.shippingAddress?.email || 'N/A'}
+                    {order.shippingAddress?.email || "N/A"}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Phone</p>
                   <p className="font-semibold text-gray-900 flex items-center gap-2">
                     <FiPhone className="w-4 h-4" />
-                    {order.shippingAddress?.phone || 'N/A'}
+                    {order.shippingAddress?.phone || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -414,8 +462,10 @@ const VendorDashboard = () => {
                   <p className="font-semibold text-gray-900 flex items-start gap-2">
                     <FiMapPin className="w-4 h-4 mt-1 flex-shrink-0" />
                     <span>
-                      {order.shippingAddress?.street}, {order.shippingAddress?.city},{' '}
-                      {order.shippingAddress?.state} - {order.shippingAddress?.zipCode}
+                      {order.shippingAddress?.street},{" "}
+                      {order.shippingAddress?.city},{" "}
+                      {order.shippingAddress?.state} -{" "}
+                      {order.shippingAddress?.zipCode}
                     </span>
                   </p>
                 </div>
@@ -424,7 +474,9 @@ const VendorDashboard = () => {
 
             {/* Order Items - Only vendor's items */}
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Your Items in This Order</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Your Items in This Order
+              </h3>
               <div className="space-y-3">
                 {order.items?.map((item, index) => (
                   <div
@@ -444,8 +496,11 @@ const VendorDashboard = () => {
                         Quantity: {item.quantity}
                       </p>
                       <p className="font-bold text-green-600">
-                        PKR {item.price?.toLocaleString()} × {item.quantity} = PKR{' '}
-                        {(item.total || item.price * item.quantity).toLocaleString()}
+                        PKR {item.price?.toLocaleString()} × {item.quantity} =
+                        PKR{" "}
+                        {(
+                          item.total || item.price * item.quantity
+                        ).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -466,7 +521,9 @@ const VendorDashboard = () => {
                   </span>
                 </div>
                 <div className="border-t border-gray-300 pt-2 flex justify-between">
-                  <span className="text-lg font-bold text-gray-900">Your Total:</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    Your Total:
+                  </span>
                   <span className="text-2xl font-bold text-green-600">
                     PKR {(order.vendorSubtotal || 0).toLocaleString()}
                   </span>
@@ -474,13 +531,13 @@ const VendorDashboard = () => {
                 <div className="flex justify-between text-gray-700 pt-2 border-t border-gray-200">
                   <span>Payment Method:</span>
                   <span className="font-semibold capitalize">
-                    {order.paymentMethod?.replace('_', ' ') || 'N/A'}
+                    {order.paymentMethod?.replace("_", " ") || "N/A"}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Payment Status:</span>
                   <span className="font-semibold capitalize">
-                    {order.paymentStatus || 'N/A'}
+                    {order.paymentStatus || "N/A"}
                   </span>
                 </div>
               </div>
@@ -489,7 +546,9 @@ const VendorDashboard = () => {
             {/* Order Notes */}
             {order.notes && (
               <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-                <h4 className="font-semibold text-gray-900 mb-2">Customer Notes:</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  Customer Notes:
+                </h4>
                 <p className="text-gray-700">{order.notes}</p>
               </div>
             )}
@@ -573,7 +632,9 @@ const VendorDashboard = () => {
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                   Vendor Dashboard
                 </h1>
-                <p className="text-gray-600 text-sm">Manage your products and track performance</p>
+                <p className="text-gray-600 text-sm">
+                  Manage your products and track performance
+                </p>
               </div>
             </div>
             <button
@@ -593,10 +654,11 @@ const VendorDashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                    }`}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                  }`}
                 >
                   <Icon className="w-5 h-5" />
                   {tab.label}
@@ -642,7 +704,9 @@ const VendorDashboard = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Add New Product</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Add New Product
+                </h2>
                 <button
                   onClick={() => setShowAddProduct(false)}
                   className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
@@ -669,7 +733,9 @@ const OverviewSection = ({ loading, stats }) => (
   >
     <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
-      <p className="text-gray-600">Here's an overview of your business performance</p>
+      <p className="text-gray-600">
+        Here's an overview of your business performance
+      </p>
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -684,8 +750,14 @@ const OverviewSection = ({ loading, stats }) => (
       <StatCard
         icon={FiDollarSign}
         title="Total Sales"
-        value={loading ? "..." : `PKR ${stats.totalSales?.toLocaleString() || 0}`}
-        change={loading ? "..." : `+PKR ${stats.salesThisMonth?.toLocaleString() || 0}`}
+        value={
+          loading ? "..." : `PKR ${stats.totalSales?.toLocaleString() || 0}`
+        }
+        change={
+          loading
+            ? "..."
+            : `+PKR ${stats.salesThisMonth?.toLocaleString() || 0}`
+        }
         changeLabel="this month"
         color="green"
       />
@@ -715,7 +787,9 @@ const StatCard = ({ icon: Icon, title, value, change, changeLabel, color }) => {
       className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-6"
     >
       <div className="flex items-start justify-between mb-4">
-        <div className={`w-14 h-14 bg-gradient-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center shadow-lg`}>
+        <div
+          className={`w-14 h-14 bg-gradient-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center shadow-lg`}
+        >
           <Icon className="w-7 h-7 text-white" />
         </div>
         <div className="flex items-center gap-1 text-green-600 text-sm font-semibold">
@@ -726,7 +800,8 @@ const StatCard = ({ icon: Icon, title, value, change, changeLabel, color }) => {
       <h3 className="text-gray-600 font-medium mb-2">{title}</h3>
       <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
       <p className="text-sm text-gray-500">
-        <span className="font-semibold text-gray-700">{change}</span> {changeLabel}
+        <span className="font-semibold text-gray-700">{change}</span>{" "}
+        {changeLabel}
       </p>
     </motion.div>
   );
@@ -741,12 +816,15 @@ const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/vendor/products", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/vendor/products",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -766,7 +844,8 @@ const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
   }, []);
 
   const deleteProduct = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
 
     try {
       const token = localStorage.getItem("token");
@@ -809,7 +888,9 @@ const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200/80 p-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Product Management</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+              Product Management
+            </h2>
             <p className="text-gray-600">Manage your product inventory</p>
           </div>
           <button
@@ -827,8 +908,12 @@ const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
           <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <FiPackage className="w-12 h-12 text-gray-400" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">No Products Yet</h3>
-          <p className="text-gray-600 mb-6">Start by adding your first product</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            No Products Yet
+          </h3>
+          <p className="text-gray-600 mb-6">
+            Start by adding your first product
+          </p>
           <button
             onClick={onAddProduct}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
@@ -873,20 +958,27 @@ const ProductCard = ({ product, onDelete }) => (
         </div>
       )}
       <div className="absolute top-3 right-3">
-        <span className={`px-3 py-1 rounded-lg text-xs font-bold ${product.status === "approved"
-          ? "bg-green-100 text-green-700"
-          : product.status === "pending"
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-red-100 text-red-700"
-          }`}>
+        <span
+          className={`px-3 py-1 rounded-lg text-xs font-bold ${
+            product.status === "approved"
+              ? "bg-green-100 text-green-700"
+              : product.status === "pending"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
           {product.status}
         </span>
       </div>
     </div>
 
     <div className="p-5">
-      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
+        {product.name}
+      </h3>
+      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+        {product.description}
+      </p>
 
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -915,7 +1007,6 @@ const ProductCard = ({ product, onDelete }) => (
 );
 
 // Analytics Section Component
-
 
 // Product Form Component
 const ProductForm = ({ onProductAdded }) => {
@@ -975,7 +1066,10 @@ const ProductForm = ({ onProductAdded }) => {
     setImageFiles(newImageFiles);
 
     const imageUrls = validFiles.map((file) => URL.createObjectURL(file));
-    setFormData((prev) => ({ ...prev, images: [...prev.images, ...imageUrls] }));
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...imageUrls],
+    }));
     setError(null);
   };
 
@@ -1004,20 +1098,25 @@ const ProductForm = ({ onProductAdded }) => {
       const base64Images = await Promise.all(imagePromises);
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/vendor/products", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price),
-          quantity: parseInt(formData.quantity),
-          images: base64Images,
-          specifications: formData.specifications.filter((s) => s.key && s.value),
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/vendor/products",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            price: parseFloat(formData.price),
+            quantity: parseInt(formData.quantity),
+            images: base64Images,
+            specifications: formData.specifications.filter(
+              (s) => s.key && s.value
+            ),
+          }),
+        }
+      );
 
       if (response.ok) {
         onProductAdded();
@@ -1053,7 +1152,12 @@ const ProductForm = ({ onProductAdded }) => {
       specifications: prev.specifications.filter((_, i) => i !== index),
     }));
   };
-  const OrderDetailsModal = ({ order, onClose, onUpdateStatus, getStatusColor }) => {
+  const OrderDetailsModal = ({
+    order,
+    onClose,
+    onUpdateStatus,
+    getStatusColor,
+  }) => {
     return (
       <motion.div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -1147,8 +1251,10 @@ const ProductForm = ({ onProductAdded }) => {
                   <p className="font-semibold text-gray-900 flex items-start gap-2">
                     <FiMapPin className="w-4 h-4 mt-1 flex-shrink-0" />
                     <span>
-                      {order.shippingAddress?.street}, {order.shippingAddress?.city},{" "}
-                      {order.shippingAddress?.state} - {order.shippingAddress?.zipCode}
+                      {order.shippingAddress?.street},{" "}
+                      {order.shippingAddress?.city},{" "}
+                      {order.shippingAddress?.state} -{" "}
+                      {order.shippingAddress?.zipCode}
                     </span>
                   </p>
                 </div>
@@ -1157,7 +1263,9 @@ const ProductForm = ({ onProductAdded }) => {
 
             {/* Order Items */}
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Order Items</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Order Items
+              </h3>
               <div className="space-y-3">
                 {order.items?.map((item, index) => (
                   <div
@@ -1177,8 +1285,8 @@ const ProductForm = ({ onProductAdded }) => {
                         Quantity: {item.quantity}
                       </p>
                       <p className="font-bold text-green-600">
-                        PKR {item.price?.toLocaleString()} × {item.quantity} = PKR{" "}
-                        {item.total?.toLocaleString()}
+                        PKR {item.price?.toLocaleString()} × {item.quantity} =
+                        PKR {item.total?.toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -1215,7 +1323,9 @@ const ProductForm = ({ onProductAdded }) => {
                   </span>
                 </div>
                 <div className="border-t border-gray-300 pt-2 flex justify-between">
-                  <span className="text-lg font-bold text-gray-900">Total:</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    Total:
+                  </span>
                   <span className="text-2xl font-bold text-green-600">
                     PKR {order.total?.toLocaleString()}
                   </span>
@@ -1230,7 +1340,9 @@ const ProductForm = ({ onProductAdded }) => {
             {/* Order Notes */}
             {order.notes && (
               <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-                <h4 className="font-semibold text-gray-900 mb-2">Customer Notes:</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  Customer Notes:
+                </h4>
                 <p className="text-gray-700">{order.notes}</p>
               </div>
             )}
@@ -1361,7 +1473,9 @@ const ProductForm = ({ onProductAdded }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">Brand</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">
+              Brand
+            </label>
             <input
               type="text"
               name="brand"
@@ -1424,8 +1538,12 @@ const ProductForm = ({ onProductAdded }) => {
             className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2"
           >
             <FiUpload className="w-8 h-8 text-gray-400" />
-            <span className="text-gray-600 font-medium">Click to upload images</span>
-            <span className="text-sm text-gray-500">Max 5 images, 5MB each</span>
+            <span className="text-gray-600 font-medium">
+              Click to upload images
+            </span>
+            <span className="text-sm text-gray-500">
+              Max 5 images, 5MB each
+            </span>
           </button>
 
           {formData.images.length > 0 && (
@@ -1468,8 +1586,12 @@ const ProductForm = ({ onProductAdded }) => {
 
           {formData.specifications.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-              <p className="text-gray-500 text-sm">No specifications added yet</p>
-              <p className="text-gray-400 text-xs mt-1">Click "Add Specification" to add product details</p>
+              <p className="text-gray-500 text-sm">
+                No specifications added yet
+              </p>
+              <p className="text-gray-400 text-xs mt-1">
+                Click "Add Specification" to add product details
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -1485,7 +1607,9 @@ const ProductForm = ({ onProductAdded }) => {
                       type="text"
                       placeholder="Specification name (e.g., Weight, Size, Color)"
                       value={spec.key}
-                      onChange={(e) => updateSpecification(index, "key", e.target.value)}
+                      onChange={(e) =>
+                        updateSpecification(index, "key", e.target.value)
+                      }
                       className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>
@@ -1494,7 +1618,9 @@ const ProductForm = ({ onProductAdded }) => {
                       type="text"
                       placeholder="Value (e.g., 2.5 kg, Large, Red)"
                       value={spec.value}
-                      onChange={(e) => updateSpecification(index, "value", e.target.value)}
+                      onChange={(e) =>
+                        updateSpecification(index, "value", e.target.value)
+                      }
                       className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                     />
                   </div>

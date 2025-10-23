@@ -356,7 +356,7 @@ const Navbar = () => {
                         <span>Browse All Products</span>
                       </div>
                     </Link>
-                    {categories.map((category) => (
+                    {/* {categories.map((category) => (
                       <Link
                         key={category}
                         to={`/category/${category
@@ -367,7 +367,7 @@ const Navbar = () => {
                       >
                         {category}
                       </Link>
-                    ))}
+                    ))} */}
                   </div>
                 )}
               </div>

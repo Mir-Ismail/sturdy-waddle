@@ -1,14 +1,14 @@
 // cartRoutes.js
-import express from 'express';
-import { protect } from '../middleware/authMiddleware.js';
+import express from "express";
+import { protect } from "../middleware/authMiddleware.js";
 import {
-    getCart,
-    addToCart,
-    updateCartItem,
-    removeFromCart,
-    clearCart,
-    getCartSummary
-} from '../controllers/cartController.js';
+  getCart,
+  addToCart,
+  updateCartItem,
+  removeFromCart,
+  clearCart,
+  getCartSummary,
+} from "../controllers/cartController.js";
 
 const router = express.Router();
 
@@ -16,21 +16,22 @@ const router = express.Router();
 router.use(protect);
 
 // Cart summary for header display (MUST be before '/' route)
-router.get('/summary', getCartSummary);
+router.get("/summary", getCartSummary);
 
 // Get user's cart
-router.get('/', getCart);
+router.get("/", getCart);
 
 // Add item to cart
-router.post('/', addToCart);
+// router.post("/");
+router.post("/", addToCart); // ✅ FIXED ✅
 
 // Clear entire cart (MUST be before '/:productId')
-router.delete('/clear', clearCart);
+router.delete("/clear", clearCart);
 
 // Update cart item quantity
-router.put('/:productId', updateCartItem);
+router.put("/:productId", updateCartItem);
 
 // Remove item from cart
-router.delete('/:productId', removeFromCart);
+router.delete("/:productId", removeFromCart);
 
 export default router;

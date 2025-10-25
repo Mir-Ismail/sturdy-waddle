@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import {
   FiPackage,
-  FiBarChart,
+  // FiBarChart,
   FiPlus,
   FiHome,
   FiLogOut,
@@ -95,7 +95,7 @@ const VendorDashboard = () => {
     { id: "overview", label: "Overview", icon: FiHome },
     { id: "products", label: "Products", icon: FiPackage },
     { id: "orders", label: "Orders", icon: FiShoppingBag }, // NEW
-    { id: "analytics", label: "Analytics", icon: FiBarChart },
+    // { id: "analytics", label: "Analytics", icon: FiBarChart },
   ];
   // Orders Section Component
   // Orders Section Component - Place this in VendorDashboard.jsx
@@ -655,10 +655,11 @@ const VendorDashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                    }`}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                  }`}
                 >
                   <Icon className="w-5 h-5" />
                   {tab.label}
@@ -958,12 +959,13 @@ const ProductCard = ({ product, onDelete }) => (
       )}
       <div className="absolute top-3 right-3">
         <span
-          className={`px-3 py-1 rounded-lg text-xs font-bold ${product.status === "approved"
-            ? "bg-green-100 text-green-700"
-            : product.status === "pending"
+          className={`px-3 py-1 rounded-lg text-xs font-bold ${
+            product.status === "approved"
+              ? "bg-green-100 text-green-700"
+              : product.status === "pending"
               ? "bg-yellow-100 text-yellow-700"
               : "bg-red-100 text-red-700"
-            }`}
+          }`}
         >
           {product.status}
         </span>
@@ -1398,7 +1400,7 @@ const ProductForm = ({ onProductAdded }) => {
   );
 };
 
-ProductsSection.displayName = 'ProductsSection';
+ProductsSection.displayName = "ProductsSection";
 
 // PropTypes validation
 OverviewSection.propTypes = {

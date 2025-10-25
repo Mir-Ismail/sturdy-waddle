@@ -9,6 +9,8 @@ import {
 } from "react-icons/fi";
 
 const ProductModeration = () => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -313,6 +315,10 @@ const ProductModeration = () => {
                       <button
                         className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                         title="View Details"
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setShowDetails(true);
+                        }}
                       >
                         <FiEye />
                       </button>
@@ -341,6 +347,75 @@ const ProductModeration = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {showDetails && selectedProduct && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl p-6 relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowDetails(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+            >
+              <FiX size={22} />
+            </button>
+
+            <h2 className="text-2xl font-bold mb-4">{selectedProduct.name}</h2>
+
+            <div className="flex gap-4">
+              <div className="w-40 h-40 bg-gray-200 rounded-lg overflow-hidden">
+                {selectedProduct.images?.[0] ? (
+                  <img
+                    src={selectedProduct.images[0]}
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="flex items-center justify-center h-full text-gray-400 text-sm">
+                    No Image
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <p>
+                  <strong>Price:</strong> PKR{" "}
+                  {selectedProduct.price.toLocaleString()}
+                </p>
+                <p>
+                  <strong>Stock:</strong> {selectedProduct.quantity}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedProduct.status}
+                </p>
+                <p>
+                  <strong>Category:</strong> {selectedProduct.category}
+                </p>
+                <p>
+                  <strong>Brand:</strong> {selectedProduct.brand || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <strong>Description:</strong>
+              <p className="text-gray-600">{selectedProduct.description}</p>
+            </div>
+
+            {selectedProduct.specifications?.length > 0 && (
+              <div className="mt-4">
+                <strong>Specifications:</strong>
+                <ul className="list-disc ml-5 text-gray-600">
+                  {selectedProduct.specifications.map((spec, index) => (
+                    <li key={index}>
+                      <strong>{spec.key}: </strong>
+                      {spec.value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

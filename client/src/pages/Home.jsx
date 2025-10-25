@@ -14,8 +14,9 @@ import {
   FiRefreshCw,
   FiChevronRight,
   FiHeart,
-  FiBarChart2
+  FiBarChart2,
 } from "react-icons/fi";
+import useWishlist from "../hooks/useWishlist";
 import HeroSection from "../components/sections/heroSection";
 import ProductSection from "../components/sections/ProductSection";
 import EmptyState from "../components/sections/EmptyState";
@@ -64,7 +65,7 @@ const Home = () => {
   };
 
   const getFeaturedProducts = () => {
-    return products.filter(product => product.featured === true).slice(0, 8);
+    return products.filter((product) => product.featured === true).slice(0, 8);
   };
 
   const getBestSellers = () => {
@@ -80,9 +81,11 @@ const Home = () => {
       "audio & video",
       "smart home",
     ];
-    return products.filter((product) =>
-      electronicsCategories.includes(product.category?.toLowerCase())
-    ).slice(0, 8);
+    return products
+      .filter((product) =>
+        electronicsCategories.includes(product.category?.toLowerCase())
+      )
+      .slice(0, 8);
   };
 
   const getHomeAppliancesProducts = () => {
@@ -92,9 +95,11 @@ const Home = () => {
       "refrigerator",
       "home appliances",
     ];
-    return products.filter((product) =>
-      homeCategories.includes(product.category?.toLowerCase())
-    ).slice(0, 8);
+    return products
+      .filter((product) =>
+        homeCategories.includes(product.category?.toLowerCase())
+      )
+      .slice(0, 8);
   };
 
   const getUniqueCategories = () => {
@@ -114,10 +119,13 @@ const Home = () => {
             <FiRefreshCw className="w-12 h-12 text-red-500" />
           </div>
           <div className="text-center space-y-4 max-w-md">
-            <h2 className="text-3xl font-bold text-gray-900">Oops! Something went wrong</h2>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Oops! Something went wrong
+            </h2>
             <p className="text-gray-600 text-lg">{error}</p>
             <p className="text-sm text-gray-500">
-              Don&apos;t worry, our team has been notified and we&apos;re working to fix this issue.
+              Don&apos;t worry, our team has been notified and we&apos;re
+              working to fix this issue.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -155,17 +163,20 @@ const Home = () => {
 
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* Quick Stats Bar - More compact */}
         <section className="py-8 -mt-16 relative z-10">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-gray-900">{products.length}+</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {products.length}+
+                </div>
                 <div className="text-sm text-gray-600">Products</div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-gray-900">{categories.length}+</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {categories.length}+
+                </div>
                 <div className="text-sm text-gray-600">Categories</div>
               </div>
               <div className="space-y-1">
@@ -256,7 +267,9 @@ const Home = () => {
               products={getProductsByCategory(category)}
               loading={loading}
               showViewAll={getProductsByCategory(category).length > 6}
-              viewAllLink={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}
+              viewAllLink={`/category/${category
+                .toLowerCase()
+                .replace(/\s+/g, "-")}`}
             />
           ))}
         </div>
@@ -280,7 +293,7 @@ const Home = () => {
           <section className="py-12">
             <EmptyState
               title="No Products Available Yet"
-              message="We&apos;re working hard to bring you amazing products. Our vendors are setting up their stores!"
+              message="We're working hard to bring you amazing products. Our vendors are setting up their stores!"
               icon="🏪"
               showButton={false}
               size="default"
@@ -293,7 +306,14 @@ const Home = () => {
 };
 
 // Clean White Section Component
-const CleanProductSection = ({ title, subtitle, products, showViewAll, viewAllLink, icon }) => {
+const CleanProductSection = ({
+  title,
+  subtitle,
+  products,
+  showViewAll,
+  viewAllLink,
+  icon,
+}) => {
   if (!products || products.length === 0) return null;
 
   return (
@@ -331,12 +351,20 @@ const CleanProductSection = ({ title, subtitle, products, showViewAll, viewAllLi
 };
 
 // Prominent Background Section Component
-const ProminentProductSection = ({ title, subtitle, products, bgColor, viewAllLink }) => {
+const ProminentProductSection = ({
+  title,
+  subtitle,
+  products,
+  bgColor,
+  viewAllLink,
+}) => {
   if (!products || products.length === 0) return null;
 
   return (
     <section className="py-8">
-      <div className={`bg-gradient-to-r ${bgColor} rounded-2xl p-8 text-white shadow-lg`}>
+      <div
+        className={`bg-gradient-to-r ${bgColor} rounded-2xl p-8 text-white shadow-lg`}
+      >
         {/* Section Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -355,7 +383,11 @@ const ProminentProductSection = ({ title, subtitle, products, bgColor, viewAllLi
         {/* Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.slice(0, 8).map((product) => (
-            <EnhancedProductCard key={product._id} product={product} isDark={true} />
+            <EnhancedProductCard
+              key={product._id}
+              product={product}
+              isDark={true}
+            />
           ))}
         </div>
       </div>
@@ -364,14 +396,10 @@ const ProminentProductSection = ({ title, subtitle, products, bgColor, viewAllLi
 };
 
 // Enhanced Product Card with Full Functionality
-const EnhancedProductCard = ({ product, isDark = false }) => {
+const EnhancedProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist(false);
   const navigate = useNavigate();
-
-  const cardBg = isDark ? "bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20" : "bg-white border-gray-200";
-  const textColor = isDark ? "text-white" : "text-gray-900";
-  const subtextColor = isDark ? "text-blue-100" : "text-gray-600";
 
   // Format price
   const formatPrice = (price) => {
@@ -389,10 +417,7 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
 
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <FiStar
-          key={i}
-          className="w-4 h-4 text-yellow-400 fill-current"
-        />
+        <FiStar key={i} className="w-4 h-4 text-yellow-400 fill-current" />
       );
     }
 
@@ -408,10 +433,7 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <FiStar
-          key={`empty-${i}`}
-          className="w-4 h-4 text-gray-300"
-        />
+        <FiStar key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
       );
     }
 
@@ -426,18 +448,22 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
-      const response = await axios.post("http://localhost:5000/api/cart", {
-        productId: product._id,
-        quantity: 1
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.post(
+        "http://localhost:5000/api/cart",
+        {
+          productId: product._id,
+          quantity: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (response.data.success) {
         // Show success notification
@@ -449,41 +475,7 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
     }
   };
 
-  const handleAddToWishlist = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      if (isWishlisted) {
-        // Remove from wishlist
-        await axios.delete(`http://localhost:5000/api/user/wishlist/${product._id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setIsWishlisted(false);
-      } else {
-        // Add to wishlist
-        await axios.post("http://localhost:5000/api/user/wishlist", {
-          productId: product._id
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setIsWishlisted(true);
-      }
-    } catch (error) {
-      console.error("Error updating wishlist:", error);
-      alert("Failed to update wishlist. Please try again.");
-    }
-  };
+  const handleAddToWishlist = (e) => toggleWishlist(e, product._id);
 
   const handleQuickView = (e) => {
     e.preventDefault();
@@ -495,20 +487,19 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
   const handleCompare = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate('/compare', { state: { productToCompare: product } });
+    navigate("/compare", { state: { productToCompare: product } });
   };
 
   return (
     <Link
       to={`/product/${product._id}`}
-      className="group block"
+      className="block"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={`${cardBg} border rounded-xl p-4 hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1 relative overflow-hidden`}>
-
+      <div className="relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
         {/* Product Image */}
-        <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden relative">
+        <div className="relative aspect-square bg-gray-100 overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <img
               src={product.images[0]}
@@ -519,102 +510,94 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
               }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <FiPackage className="w-8 h-8" />
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <div className="text-4xl text-gray-400">📦</div>
             </div>
           )}
 
-          {/* Status Badges */}
-          {product.status === "revoked" && (
-            <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md">
-              Unavailable
-            </div>
-          )}
-
-          {new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) && (
-            <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-md">
-              New
-            </div>
-          )}
-
-          {/* Discount Badge */}
-          {product.originalPrice && product.originalPrice > product.price && (
-            <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md">
-              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+          {/* Status Badge - New */}
+          {new Date(product.createdAt) >
+            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) && (
+            <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-md shadow-sm">
+              NEW
             </div>
           )}
 
           {/* Hover Actions Overlay */}
-          <div className={`absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-2 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
-            }`}>
-            <button
-              onClick={handleAddToCart}
-              className="bg-white text-gray-900 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-200 transform hover:scale-110"
-              title="Add to Cart"
-            >
-              <FiShoppingCart className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleAddToWishlist}
-              className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${isWishlisted
-                ? 'bg-red-500 text-white'
-                : 'bg-white text-gray-900 hover:bg-red-500 hover:text-white'
+          {isHovered && (
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-2 transition-opacity duration-300">
+              <button
+                onClick={handleAddToCart}
+                className="bg-white text-gray-900 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-200 transform hover:scale-110"
+                title="Add to Cart"
+              >
+                <FiShoppingCart className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleAddToWishlist}
+                className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${
+                  isWishlisted
+                    ? "bg-red-500 text-white"
+                    : "bg-white text-gray-900 hover:bg-red-500 hover:text-white"
                 }`}
-              title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <FiHeart className="w-4 h-4  " />
-            </button>
-            <button
-              onClick={handleQuickView}
-              className="bg-white text-gray-900 p-2 rounded-full hover:bg-green-500 hover:text-white transition-all duration-200 transform hover:scale-110"
-              title="Quick View"
-            >
-              <FiEye className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleCompare}
-              className="bg-white text-gray-900 p-2 rounded-full hover:bg-purple-500 hover:text-white transition-all duration-200 transform hover:scale-110"
-              title="Compare"
-            >
-              <FiBarChart2 className="w-4 h-4" />
-            </button>
-          </div>
+                title={
+                  isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                }
+              >
+                <FiHeart className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleQuickView}
+                className="bg-white text-gray-900 p-2 rounded-full hover:bg-green-500 hover:text-white transition-all duration-200 transform hover:scale-110"
+                title="Quick View"
+              >
+                <FiEye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleCompare}
+                className="bg-white text-gray-900 p-2 rounded-full hover:bg-purple-500 hover:text-white transition-all duration-200 transform hover:scale-110"
+                title="Compare"
+              >
+                <FiBarChart2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
-        <div className="space-y-2">
+        <div className="p-4 space-y-2">
           {/* Category */}
           {product.category && (
-            <p className={`text-xs ${subtextColor} uppercase tracking-wide`}>{product.category}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">
+              {product.category}
+            </p>
           )}
 
-          <h3 className={`font-medium ${textColor} line-clamp-2 group-hover:text-blue-600 transition-colors text-sm leading-tight`}>
+          {/* Title */}
+          <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors text-base leading-tight">
             {product.name}
           </h3>
 
+          {/* Brand */}
           {product.brand && (
-            <p className={`text-xs ${subtextColor} font-medium`}>{product.brand}</p>
+            <p className="text-sm text-gray-600 font-medium">{product.brand}</p>
           )}
 
           {/* Rating */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
-              <div className="flex">
-                {getRatingStars()}
-              </div>
-              <span className={`text-xs ${subtextColor}`}>
-                (4.5)
-              </span>
+              <div className="flex">{getRatingStars()}</div>
+              <span className="text-xs text-gray-500">(4.5)</span>
             </div>
           </div>
 
           {/* Price */}
           <div className="flex items-center space-x-2">
-            <span className={`font-bold ${textColor} text-lg`}>
+            <span className="font-bold text-lg text-gray-900">
               {formatPrice(product.price)}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className={`text-sm ${subtextColor} line-through`}>
+              <span className="text-sm text-gray-500 line-through">
                 {formatPrice(product.originalPrice)}
               </span>
             )}
@@ -623,7 +606,9 @@ const EnhancedProductCard = ({ product, isDark = false }) => {
           {/* Stock Status */}
           <div className="text-xs">
             {product.quantity > 0 ? (
-              <span className="text-green-600 font-medium">{product.quantity} available</span>
+              <span className="text-green-600 font-medium">
+                {product.quantity} available
+              </span>
             ) : (
               <span className="text-red-500 font-medium">Out of stock</span>
             )}
@@ -653,8 +638,20 @@ ProminentProductSection.propTypes = {
 };
 
 EnhancedProductCard.propTypes = {
-  product: PropTypes.object.isRequired,
-  isDark: PropTypes.bool,
+  product: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    originalPrice: PropTypes.number,
+    quantity: PropTypes.number.isRequired,
+    category: PropTypes.string,
+    brand: PropTypes.string,
+    images: PropTypes.arrayOf(PropTypes.string),
+    createdAt: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]),
+  }).isRequired,
 };
 
 export default Home;

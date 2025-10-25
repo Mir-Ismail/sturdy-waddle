@@ -1,24 +1,5 @@
 /* Main Content Layout */
-
-.main-content {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  /* Account for fixed header */
-}
-
-/* Responsive padding adjustments */
-@media (max-width: 768px) {
-  .main-content {
-    padding-top: 100px;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding-top: 80px;
-  }
-}
+/* These styles are now handled by Tailwind classes in the Layout component */
 
 /* Page content wrapper */
 .page-content {

@@ -9,8 +9,9 @@ import {
   FiHeart,
   FiEye,
   FiBarChart2,
-  FiStar
+  FiStar,
 } from "react-icons/fi";
+import useWishlist from "../../hooks/useWishlist";
 
 const ProductSection = ({
   title,
@@ -22,7 +23,7 @@ const ProductSection = ({
   viewAllLink,
   sectionIcon,
   sectionColor = "from-blue-500 to-purple-500",
-  loading = false
+  loading = false,
 }) => {
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -32,7 +33,7 @@ const ProductSection = ({
       transition: {
         duration: 0.4,
         staggerChildren: 0.05,
-        ease: "easeOut"
+        ease: "easeOut",
       },
     },
   };
@@ -44,8 +45,8 @@ const ProductSection = ({
       y: 0,
       transition: {
         duration: 0.3,
-        ease: "easeOut"
-      }
+        ease: "easeOut",
+      },
     },
   };
 
@@ -53,23 +54,28 @@ const ProductSection = ({
   if (loading) {
     return (
       <section className="py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="w-32 h-6 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-          <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {[...Array(6)].map((_, index) => (
-            <div key={index} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse">
-              <div className="aspect-square bg-gray-200 rounded-lg mb-3"></div>
-              <div className="w-full h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="w-16 h-3 bg-gray-200 rounded mb-1"></div>
-              <div className="w-12 h-4 bg-gray-200 rounded"></div>
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div className="w-32 h-6 bg-gray-200 rounded animate-pulse"></div>
             </div>
-          ))}
+            <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse"
+              >
+                <div className="aspect-square bg-gray-200 rounded-lg mb-3"></div>
+                <div className="w-full h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="w-16 h-3 bg-gray-200 rounded mb-1"></div>
+                <div className="w-12 h-4 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -82,18 +88,23 @@ const ProductSection = ({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             {sectionIcon && (
-              <div className={`w-8 h-8 bg-gradient-to-r ${sectionColor} rounded-lg flex items-center justify-center`}>
+              <div
+                className={`w-8 h-8 bg-gradient-to-r ${sectionColor} rounded-lg flex items-center justify-center`}
+              >
                 {sectionIcon}
               </div>
             )}
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
           </div>
         </div>
-
-        <div className="text-center py-12 bg-gray-50 rounded-2xl">
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
           <div className="text-4xl mb-4">{emptyIcon}</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">{emptyMessage}</h3>
-          <p className="text-gray-600 text-sm mb-6">Check back soon for new products</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {emptyMessage}
+          </h3>
+          <p className="text-gray-600 text-sm mb-6">
+            Check back soon for new products
+          </p>
           <Link
             to="/products"
             className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
@@ -118,53 +129,59 @@ const ProductSection = ({
       viewport={{ once: true, margin: "-50px" }}
       variants={containerVariants}
     >
-      {/* Compact Section Header */}
-      <div className="flex items-center justify-between mb-6">
-        <motion.div className="flex items-center space-x-3" variants={itemVariants}>
-          {sectionIcon && (
-            <div className={`w-8 h-8 bg-gradient-to-r ${sectionColor} rounded-lg flex items-center justify-center shadow-sm`}>
-              {sectionIcon}
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-            {subtitle && (
-              <p className="text-sm text-gray-600 mt-0.5">{subtitle}</p>
-            )}
-          </div>
-        </motion.div>
-
-        {/* View All Link */}
-        {(showViewAll || hasMoreProducts) && (
-          <motion.div variants={itemVariants}>
-            <Link
-              to={viewAllLink}
-              className="inline-flex items-center space-x-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 group"
-            >
-              <span>View All</span>
-              <FiChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
-            </Link>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Compact Products Grid - 6 columns on desktop */}
-      <motion.div
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4"
-        variants={containerVariants}
-      >
-        {displayedProducts.map((product, index) => (
+      <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+        {/* Compact Section Header */}
+        <div className="flex items-center justify-between mb-6">
           <motion.div
-            key={product._id || product.id || index}
+            className="flex items-center space-x-3"
             variants={itemVariants}
-            whileHover={{ y: -2 }}
-            className="group"
           >
-            <EnhancedCompactProductCard product={product} />
+            {sectionIcon && (
+              <div
+                className={`w-8 h-8 bg-gradient-to-r ${sectionColor} rounded-lg flex items-center justify-center shadow-sm`}
+              >
+                {sectionIcon}
+              </div>
+            )}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+              {subtitle && (
+                <p className="text-sm text-gray-600 mt-0.5">{subtitle}</p>
+              )}
+            </div>
           </motion.div>
-        ))}
-      </motion.div>
 
+          {/* View All Link */}
+          {(showViewAll || hasMoreProducts) && (
+            <motion.div variants={itemVariants}>
+              <Link
+                to={viewAllLink}
+                className="inline-flex items-center space-x-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 group"
+              >
+                <span>View All</span>
+                <FiChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+              </Link>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Compact Products Grid - 6 columns on desktop */}
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4"
+          variants={containerVariants}
+        >
+          {displayedProducts.map((product, index) => (
+            <motion.div
+              key={product._id || product.id || index}
+              variants={itemVariants}
+              whileHover={{ y: -2 }}
+              className="group"
+            >
+              <EnhancedCompactProductCard product={product} />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
       {/* Show more products indicator */}
       {hasMoreProducts && (
         <motion.div
@@ -190,7 +207,7 @@ const ProductSection = ({
 // Enhanced Compact Product Card with all ProductCard functionality
 const EnhancedCompactProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist(false);
   const navigate = useNavigate();
 
   // Format price like in ProductCard
@@ -209,10 +226,7 @@ const EnhancedCompactProductCard = ({ product }) => {
 
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <FiStar
-          key={i}
-          className="w-3 h-3 text-yellow-400 fill-current"
-        />
+        <FiStar key={i} className="w-3 h-3 text-yellow-400 fill-current" />
       );
     }
 
@@ -228,10 +242,7 @@ const EnhancedCompactProductCard = ({ product }) => {
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <FiStar
-          key={`empty-${i}`}
-          className="w-3 h-3 text-gray-300"
-        />
+        <FiStar key={`empty-${i}`} className="w-3 h-3 text-gray-300" />
       );
     }
 
@@ -241,7 +252,10 @@ const EnhancedCompactProductCard = ({ product }) => {
   // Check if product is new (within 7 days)
   const isNewProduct = () => {
     if (!product.createdAt) return false;
-    return new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    return (
+      new Date(product.createdAt) >
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    );
   };
 
   // Action handlers from ProductCard
@@ -252,13 +266,7 @@ const EnhancedCompactProductCard = ({ product }) => {
     // Add your cart logic here
   };
 
-  const handleWishlist = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-    console.log("Wishlist toggled:", product.name);
-    // Add your wishlist logic here
-  };
+  const handleWishlist = (e) => toggleWishlist(e, product._id || product.id);
 
   const handleQuickView = (e) => {
     e.preventDefault();
@@ -270,7 +278,7 @@ const EnhancedCompactProductCard = ({ product }) => {
   const handleCompare = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate('/compare', { state: { productToCompare: product } });
+    navigate("/compare", { state: { productToCompare: product } });
   };
 
   return (
@@ -281,7 +289,6 @@ const EnhancedCompactProductCard = ({ product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="bg-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200 overflow-hidden relative">
-
         {/* Product Image */}
         <div className="aspect-square bg-gray-50 overflow-hidden relative">
           {product.images && product.images.length > 0 ? (
@@ -315,19 +322,29 @@ const EnhancedCompactProductCard = ({ product }) => {
           {/* Discount Badge */}
           {product.originalPrice && product.originalPrice > product.price && (
             <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md">
-              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+              -
+              {Math.round(
+                ((product.originalPrice - product.price) /
+                  product.originalPrice) *
+                  100
+              )}
+              %
             </div>
           )}
 
           {/* Hover Actions Overlay */}
-          <div className={`absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-1 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
-            }`}>
+          <div
+            className={`absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-1 transition-all duration-300 ${
+              isHovered ? "opacity-100" : "opacity-0"
+            }`}
+          >
             <button
               onClick={handleWishlist}
-              className={`p-1.5 rounded-full transition-all duration-200 transform hover:scale-110 text-xs ${isWishlisted
-                ? 'bg-red-500 text-white'
-                : 'bg-white text-gray-900 hover:bg-red-500 hover:text-white'
-                }`}
+              className={`p-1.5 rounded-full transition-all duration-200 transform hover:scale-110 text-xs ${
+                isWishlisted
+                  ? "bg-red-500 text-white"
+                  : "bg-white text-gray-900 hover:bg-red-500 hover:text-white"
+              }`}
               title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
             >
               <FiHeart className="w-3 h-3" />
@@ -360,7 +377,9 @@ const EnhancedCompactProductCard = ({ product }) => {
         <div className="p-3">
           {/* Category */}
           {product.category && (
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{product.category}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+              {product.category}
+            </p>
           )}
 
           <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600 transition-colors duration-200">
@@ -369,15 +388,15 @@ const EnhancedCompactProductCard = ({ product }) => {
 
           {/* Brand */}
           {product.brand && (
-            <p className="text-xs text-gray-500 mb-2 font-medium">{product.brand}</p>
+            <p className="text-xs text-gray-500 mb-2 font-medium">
+              {product.brand}
+            </p>
           )}
 
           {/* Rating */}
           {(product.rating || product.rating === 0) && (
             <div className="flex items-center space-x-1 mb-2">
-              <div className="flex items-center">
-                {getRatingStars()}
-              </div>
+              <div className="flex items-center">{getRatingStars()}</div>
               <span className="text-xs text-gray-500">
                 ({product.reviewCount || 0})
               </span>
@@ -399,7 +418,9 @@ const EnhancedCompactProductCard = ({ product }) => {
           {/* Stock Status */}
           <div className="text-xs">
             {product.quantity > 0 ? (
-              <span className="text-green-600 font-medium">{product.quantity} available</span>
+              <span className="text-green-600 font-medium">
+                {product.quantity} available
+              </span>
             ) : (
               <span className="text-red-500 font-medium">Out of stock</span>
             )}

@@ -27,6 +27,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import SalesAnalytics from "./SalesAnalytics";
+import ProductEditForm from "./ProductEditForm";
 
 const VendorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -812,6 +813,7 @@ const StatCard = ({ icon: Icon, title, value, change, changeLabel, color }) => {
 const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchProducts = async () => {
     try {
@@ -842,6 +844,42 @@ const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const cancelEdit = () => setEditingProduct(null);
+
+  const saveEdit = async (productId, updatedData) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/vendor/products/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to update product");
+      }
+
+      const data = await response.json();
+      const updatedProduct = data.product || data;
+
+      setProducts((prev) =>
+        prev.map((p) => (p._id === productId ? updatedProduct : p))
+      );
+      setEditingProduct(null);
+      return updatedProduct;
+    } catch (err) {
+      console.error("Error updating product:", err);
+      throw err;
+    }
+  };
 
   const deleteProduct = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?"))
@@ -929,16 +967,56 @@ const ProductsSection = React.forwardRef(({ onAddProduct }, ref) => {
               key={product._id}
               product={product}
               onDelete={deleteProduct}
+              onEdit={() => setEditingProduct(product)}
             />
           ))}
         </div>
       )}
+
+      {/* Edit Product Modal (inside ProductsSection so it has access to editingProduct) */}
+      <AnimatePresence>
+        {editingProduct && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setEditingProduct(null)}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Edit Product
+                </h2>
+                <button
+                  onClick={() => setEditingProduct(null)}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  <FiX className="w-6 h-6 text-gray-600" />
+                </button>
+              </div>
+
+              <ProductEditForm
+                product={editingProduct}
+                onSave={saveEdit}
+                onCancel={cancelEdit}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 });
 
 // Product Card Component
-const ProductCard = ({ product, onDelete }) => (
+const ProductCard = ({ product, onDelete, onEdit }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -990,7 +1068,10 @@ const ProductCard = ({ product, onDelete }) => (
       </div>
 
       <div className="flex gap-2">
-        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors">
+        <button
+          onClick={onEdit}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"
+        >
           <FiEdit className="w-4 h-4" />
           Edit
         </button>
@@ -1424,6 +1505,7 @@ ProductsSection.propTypes = {
 ProductCard.propTypes = {
   product: PropTypes.object.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
 };
 
 ProductForm.propTypes = {

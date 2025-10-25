@@ -61,16 +61,16 @@ const Navbar = () => {
   };
 
   // Product categories for dropdown
-  const categories = [
-    "Air conditioner",
-    "Kitchen appliances",
-    "PCs & laptop",
-    "Gadgets",
-    "Smart home",
-    "Audio & video",
-    "Refrigerator",
-    "Home appliances",
-  ];
+  // const categories = [
+  //   "Air conditioner",
+  //   "Kitchen appliances",
+  //   "PCs & laptop",
+  //   "Gadgets",
+  //   "Smart home",
+  //   "Audio & video",
+  //   "Refrigerator",
+  //   "Home appliances",
+  // ];
 
   const navigation = [
     {
@@ -116,7 +116,7 @@ const Navbar = () => {
 
   return (
     <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm">
-      {/* Top Bar (subtle, minimal) */}
+      {/* Top Bar (subtle, minimal) - Hidden on mobile */}
       <div className="hidden md:block bg-white border-b border-gray-100/80 text-gray-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center text-xs py-2">
@@ -147,44 +147,96 @@ const Navbar = () => {
         } bg-white`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="flex items-center space-x-2 flex-shrink-0 group"
-            >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <FiGrid className="text-white w-5 h-5" />
-              </div>
-              <span className="text-xl font-bold">
-                Market
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Match
+          {/* Mobile: Stack layout */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* First Row: Logo + User Actions + Menu Toggle */}
+            <div className="flex items-center justify-between w-full md:w-auto">
+              {/* Logo */}
+              <Link
+                to="/"
+                className="flex items-center space-x-2 flex-shrink-0 group"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <FiGrid className="text-white w-5 h-5" />
+                </div>
+                <span className="text-xl font-bold">
+                  Market
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Match
+                  </span>
                 </span>
-              </span>
-            </Link>
+              </Link>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl mx-4 md:mx-8">
+              {/* User Actions - Mobile */}
+              <div className="flex items-center gap-2 md:hidden">
+                {isAuthenticated && isCustomer() && (
+                  <>
+                    {/* Wishlist */}
+                    <Link
+                      to="/wishlist"
+                      className="relative p-2 text-gray-600 hover:text-red-500 rounded-lg transition-colors"
+                    >
+                      <FiHeart className="w-5 h-5" />
+                    </Link>
+
+                    {/* Cart */}
+                    <button
+                      onClick={() => setIsCartOpen(true)}
+                      className="relative p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
+                    >
+                      <FiShoppingCart className="w-5 h-5" />
+                      {cartCount > 0 && (
+                        <span
+                          className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 
+                                       bg-gradient-to-r from-blue-600 to-purple-600 
+                                       text-white text-xs rounded-full flex items-center 
+                                       justify-center font-semibold animate-pulse
+                                       shadow-lg ring-2 ring-white"
+                        >
+                          {cartCount}
+                        </span>
+                      )}
+                    </button>
+                  </>
+                )}
+
+                {/* Mobile Menu Toggle */}
+                <button
+                  className="p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
+                  onClick={toggleMenu}
+                >
+                  {isOpen ? (
+                    <FiX className="w-5 h-5" />
+                  ) : (
+                    <FiMenu className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Second Row: Search Bar - Full width on mobile */}
+            <div className="w-full md:flex-1 md:max-w-2xl md:mx-4 lg:mx-8">
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiSearch className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
-                  type="text"
+                  type="search"
                   placeholder="Search for products..."
-                  className="block w-full pl-12 pr-24 py-2.5 border border-gray-200 rounded-full 
+                  aria-label="Search for products"
+                  className="block w-full pl-10 pr-20 py-2 border border-gray-200 rounded-full 
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                            bg-gray-50 hover:bg-white transition-all duration-200
-                           text-sm placeholder-gray-500"
+                           text-sm placeholder-gray-500 appearance-none
+                           focus:bg-white"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
                 <button
-                  className="absolute inset-y-0 right-2 my-1.5 px-4 flex items-center
+                  className="absolute inset-y-0 right-1 my-1 px-3 flex items-center
                            bg-gradient-to-r from-blue-600 to-purple-600 text-white
-                           rounded-full text-sm font-medium hover:shadow-lg transition-all"
+                           rounded-full text-xs font-medium hover:shadow-lg transition-all"
                   onClick={handleSearch}
                 >
                   Search
@@ -192,8 +244,8 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* User Actions */}
-            <div className="flex items-center gap-2 md:gap-4">
+            {/* Third Row: User Actions - Desktop */}
+            <div className="hidden md:flex items-center gap-2 lg:gap-4">
               {isAuthenticated ? (
                 <>
                   {/* Customer Actions */}
@@ -262,11 +314,11 @@ const Navbar = () => {
                             <img
                               src={user.pic}
                               alt={user.name}
-                              className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-200"
+                              className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200"
                             />
                           ) : (
-                            <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                              <FiUser className="w-5 h-5 text-white" />
+                            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                              <FiUser className="w-4 h-4 text-white" />
                             </div>
                           )}
                           <div className="hidden lg:block text-left">
@@ -303,24 +355,12 @@ const Navbar = () => {
                   </Link>
                 </div>
               )}
-
-              {/* Mobile Menu Toggle */}
-              <button
-                className="md:hidden p-2 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
-                onClick={toggleMenu}
-              >
-                {isOpen ? (
-                  <FiX className="w-6 h-6" />
-                ) : (
-                  <FiMenu className="w-6 h-6" />
-                )}
-              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Navigation Bar */}
+      {/* Navigation Bar - Hidden on mobile */}
       <nav className="bg-white border-t border-gray-100 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3">
@@ -356,18 +396,6 @@ const Navbar = () => {
                         <span>Browse All Products</span>
                       </div>
                     </Link>
-                    {/* {categories.map((category) => (
-                      <Link
-                        key={category}
-                        to={`/category/${category
-                          .toLowerCase()
-                          .replace(/\s+/g, "-")}`}
-                        className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 
-                   hover:text-blue-600 transition-colors duration-150"
-                      >
-                        {category}
-                      </Link>
-                    ))} */}
                   </div>
                 )}
               </div>
@@ -410,7 +438,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Fixed with proper background */}
       {isOpen && (
         <div
           className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
@@ -420,7 +448,7 @@ const Navbar = () => {
             className="absolute inset-y-0 right-0 w-80 bg-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
               <button
                 onClick={() => setIsOpen(false)}
@@ -431,7 +459,7 @@ const Navbar = () => {
               </button>
             </div>
 
-            <div className="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+            <div className="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-80px)] bg-white">
               {/* Mobile Cart Button for Customers */}
               {isAuthenticated && isCustomer() && (
                 <button
@@ -460,19 +488,19 @@ const Navbar = () => {
                   key={item.name}
                   to={item.href}
                   className="block w-full text-left py-3 px-4 text-gray-700 hover:bg-blue-50 
-                           hover:text-blue-600 rounded-xl transition-all duration-200"
+                           hover:text-blue-600 rounded-xl transition-all duration-200 bg-white"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
 
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 bg-white">
                 <h3 className="px-4 text-sm font-semibold text-gray-900 mb-3">
                   Categories
                 </h3>
                 <div className="space-y-2">
-                  {categories.map((category) => (
+                  {/* {categories.map((category) => (
                     <Link
                       key={category}
                       to={`/category/${category
@@ -484,7 +512,7 @@ const Navbar = () => {
                     >
                       {category}
                     </Link>
-                  ))}
+                  ))} */}
                   <Link
                     to="/products"
                     className="block w-full text-left py-2 px-4 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-all duration-200"

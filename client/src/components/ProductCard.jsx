@@ -2,19 +2,21 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FiHeart, FiShoppingCart, FiStar, FiEye, FiBarChart2 } from "react-icons/fi";
+import {
+  FiHeart,
+  FiShoppingCart,
+  FiStar,
+  FiEye,
+  FiBarChart2,
+} from "react-icons/fi";
+import useWishlist from "../hooks/useWishlist";
 
 const ProductCard = ({ product }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
-  const handleWishlist = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-  };
-
+  const handleWishlist = (e) => toggleWishlist(e, product._id);
 
   const handleAddToCart = () => {
     // Placeholder for add to cart functionality
@@ -24,7 +26,7 @@ const ProductCard = ({ product }) => {
   const handleCompare = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate('/compare', { state: { productToCompare: product } });
+    navigate("/compare", { state: { productToCompare: product } });
   };
 
   const formatPrice = (price) => {
@@ -420,8 +422,8 @@ const ProductCard = ({ product }) => {
 
           {new Date(product.createdAt) >
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) && (
-              <div style={styles.statusBadgeNew}>New</div>
-            )}
+            <div style={styles.statusBadgeNew}>New</div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -482,7 +484,10 @@ ProductCard.propTypes = {
     brand: PropTypes.string,
     status: PropTypes.string,
     images: PropTypes.arrayOf(PropTypes.string),
-    createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    createdAt: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]),
   }).isRequired,
 };
 

@@ -1,5 +1,5 @@
 // App.jsx
-import { useState } from "react";
+
 import {
   BrowserRouter,
   Routes,
@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ResponsiveFooter from "./components/ResponsiveFooter";
-import ResponsiveSidebar from "./components/ResponsiveSidebar";
+
 import LoadingSpinner from "./components/LoadingSpinner";
 import UserProfile from "./pages/UserProfile";
 import ProductDetails from "./components/ProductDetails";
@@ -39,7 +39,6 @@ import Navbar from "./components/Navbar";
 const Layout = ({ children }) => {
   const { loading } = useAuth();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const showNavbar = !location.pathname.startsWith("/dashboard");
 
@@ -48,19 +47,11 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <>
-      {showNavbar && (
-        <>
-          <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
-          <ResponsiveSidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-          />
-        </>
-      )}
-      <main className="main-content">{children}</main>
+    <div className="min-h-screen flex flex-col">
+      {showNavbar && <Navbar />}
+      <main className={`flex-1"}`}>{children}</main>
       {showNavbar && <ResponsiveFooter />}
-    </>
+    </div>
   );
 };
 

@@ -1,8 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { FiStar, FiShoppingCart, FiHeart, FiClock } from "react-icons/fi";
+import {
+  FiStar,
+  FiShoppingCart,
+  FiHeart,
+  FiClock,
+  FiEye,
+  FiBarChart2,
+} from "react-icons/fi";
+import useWishlist from "../hooks/useWishlist";
+import axios from "axios";
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
@@ -33,7 +43,8 @@ const NewArrivals = () => {
     fetchNewArrivals();
   }, []);
 
-  if (loading) return <LoadingSpinner fullScreen text="Loading new arrivals..." />;
+  if (loading)
+    return <LoadingSpinner fullScreen text="Loading new arrivals..." />;
 
   if (error) {
     return (
@@ -93,79 +104,9 @@ const NewArrivals = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 whileHover={{ y: -5 }}
-                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden flex flex-col justify-between"
+                className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden relative group"
               >
-                <Link
-                  to={`/product/${product._id}`}
-                  className="relative group block"
-                >
-                  <img
-                    src={product.images?.[0] || "/placeholder-product.jpg"}
-                    alt={product.name}
-                    onError={(e) => (e.target.src = "/placeholder-product.jpg")}
-                    className="w-full h-60 object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-
-                  <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow animate-pulse">
-                    NEW
-                  </div>
-
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity">
-                    View Details
-                  </div>
-                </Link>
-
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-gray-800 truncate">
-                    {product.name}
-                  </h3>
-                  {product.brand && (
-                    <p className="text-sm text-gray-500">{product.brand}</p>
-                  )}
-
-                  <div className="flex items-center gap-1 mt-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FiStar
-                        key={star}
-                        className={`${star <= 4 ? "text-yellow-400" : "text-gray-300"
-                          }`}
-                      />
-                    ))}
-                    <span className="text-gray-500 text-sm">(4.0)</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className="text-xl font-bold text-green-600">
-                      PKR {product.price.toLocaleString()}
-                    </span>
-                    {product.originalPrice &&
-                      product.originalPrice > product.price && (
-                        <span className="text-gray-400 line-through text-sm">
-                          PKR {product.originalPrice.toLocaleString()}
-                        </span>
-                      )}
-                  </div>
-
-                  <div className="mt-2">
-                    <span
-                      className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${product.quantity > 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
-                        }`}
-                    >
-                      {product.quantity > 0 ? "In Stock" : "Out of Stock"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 p-5 pt-0">
-                  <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
-                    <FiShoppingCart /> Add to Cart
-                  </button>
-                  <button className="p-2 border border-gray-200 rounded-lg hover:text-red-500 hover:border-red-300 transition-all">
-                    <FiHeart />
-                  </button>
-                </div>
+                <NewArrivalsProductCard product={product} />
               </motion.div>
             ))}
           </div>
@@ -189,6 +130,220 @@ const NewArrivals = () => {
       </div>
     </div>
   );
+};
+
+// New Arrivals Product Card Component
+const NewArrivalsProductCard = ({ product }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist(false);
+  const navigate = useNavigate();
+
+  // Format price
+  const formatPrice = (price) => {
+    return `PKR ${price.toLocaleString()}`;
+  };
+
+  // Action handlers
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await axios.post(
+        "http://localhost:5000/api/cart",
+        {
+          productId: product._id,
+          quantity: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        alert("Added to cart successfully!");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Failed to add to cart. Please try again.");
+    }
+  };
+
+  const handleAddToWishlist = (e) => toggleWishlist(e, product._id);
+
+  const handleQuickView = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Quick view:", product.name);
+  };
+
+  const handleCompare = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate("/compare", { state: { productToCompare: product } });
+  };
+
+  return (
+    <Link
+      to={`/product/${product._id}`}
+      className="block"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        {/* Product Image */}
+        <div className="relative aspect-square bg-gray-100 overflow-hidden">
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.src = "/placeholder-product.jpg";
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <div className="text-4xl text-gray-400">📦</div>
+            </div>
+          )}
+
+          {/* Status Badge - New */}
+          <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-md shadow-sm">
+            NEW
+          </div>
+
+          {/* Hover Actions Overlay - Only covers the image area */}
+          {isHovered && (
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center space-x-2 transition-opacity duration-300">
+              <button
+                onClick={handleAddToCart}
+                className="bg-white text-gray-900 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-all duration-200 transform hover:scale-110"
+                title="Add to Cart"
+              >
+                <FiShoppingCart className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleAddToWishlist}
+                className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${
+                  isWishlisted
+                    ? "bg-red-500 text-white"
+                    : "bg-white text-gray-900 hover:bg-red-500 hover:text-white"
+                }`}
+                title={
+                  isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                }
+              >
+                <FiHeart className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleQuickView}
+                className="bg-white text-gray-900 p-2 rounded-full hover:bg-green-500 hover:text-white transition-all duration-200 transform hover:scale-110"
+                title="Quick View"
+              >
+                <FiEye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleCompare}
+                className="bg-white text-gray-900 p-2 rounded-full hover:bg-purple-500 hover:text-white transition-all duration-200 transform hover:scale-110"
+                title="Compare"
+              >
+                <FiBarChart2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Product Info */}
+        <div className="p-4 space-y-2">
+          {/* Category */}
+          {product.category && (
+            <p className="text-xs text-gray-500 uppercase tracking-wide">
+              {product.category}
+            </p>
+          )}
+
+          {/* Title */}
+          <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors text-base leading-tight">
+            {product.name}
+          </h3>
+
+          {/* Brand */}
+          {product.brand && (
+            <p className="text-sm text-gray-600 font-medium">{product.brand}</p>
+          )}
+
+          {/* Rating */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1">
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <FiStar
+                    key={star}
+                    className={`w-4 h-4 ${
+                      star <= 4
+                        ? "text-yellow-400 fill-current"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-gray-500">(4.0)</span>
+            </div>
+          </div>
+
+          {/* Price */}
+          <div className="flex items-center space-x-2">
+            <span className="font-bold text-lg text-gray-900">
+              {formatPrice(product.price)}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-sm text-gray-500 line-through">
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+          </div>
+
+          {/* Stock Status */}
+          <div className="text-xs">
+            {product.quantity > 0 ? (
+              <span className="text-green-600 font-medium">
+                {product.quantity} available
+              </span>
+            ) : (
+              <span className="text-red-500 font-medium">Out of stock</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+NewArrivalsProductCard.propTypes = {
+  product: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    originalPrice: PropTypes.number,
+    quantity: PropTypes.number.isRequired,
+    category: PropTypes.string,
+    brand: PropTypes.string,
+    status: PropTypes.string,
+    images: PropTypes.arrayOf(PropTypes.string),
+    createdAt: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]),
+  }).isRequired,
 };
 
 export default NewArrivals;
